@@ -274,6 +274,27 @@
     <div class="watermark">Rizznake © Radhin</div>
 
     <script>
+      // Add to your game.html script
+        async function submitScore(score, charIdx) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user_id');
+    
+            if (!userId) return;
+
+            try {
+                await fetch('/api/score/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        score: score,
+                        character_used: charIdx
+                    })
+                });
+            } catch (e) {
+                console.warn('Failed to submit score:', e);
+            }
+        }  
         // ================== CONFIG ==================
         const GRID_W = 20;
         const GRID_H = 16;
@@ -501,6 +522,12 @@
         }
 
         function endGame() {
+            gameState.running = false;
+            playDie();
+            saveScore(); // local best
+    
+            // Submit to global leaderboard
+            submitScore(gameState.score, gameState.charIdx);
             gameState.running = false;
             playDie();
             saveScore();
