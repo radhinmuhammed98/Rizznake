@@ -279,10 +279,10 @@
         const GRID_H = 16;
         const BASE_SPEED = 130; // ms
 
-        const characters = [
-            { name: "Dashamoolam", color: "char-0", eatFreq: 600, dieFreq: 150 },
-            { name: "Vasu", color: "char-1", eatFreq: 800, dieFreq: 120 },
-            { name: "Sayip", color: "char-2", eatFreq: 1000, dieFreq: 100 }
+       const characters = [
+            { name: "Dashamoolam", color: "char-0", eatFreq: 600, dieFreq: 150, image: "dashamoolam.jpg" },
+            { name: "Vasu", color: "char-1", eatFreq: 800, dieFreq: 120, image: "vasu.jpg" },
+            { name: "Sayip", color: "char-2", eatFreq: 1000, dieFreq: 100, image: "sayip.jpg" }
         ];
 
         // ================== STATE ==================
@@ -462,21 +462,42 @@
             // Reset all cells
             for (let el of gameState.cellElements) {
                 el.className = 'cell';
+                el.innerHTML = ''; // Clear any image
             }
 
             // Draw food
             const foodIdx = getIndex(gameState.food.x, gameState.food.y);
             gameState.cellElements[foodIdx].classList.add('food');
-
-            // Draw snake
-            gameState.snake.forEach((seg, i) => {
+        
+            // Draw snake body (tail segments)
+            for (let i = 1; i < gameState.snake.length; i++) {
+                const seg = gameState.snake[i];
                 const idx = getIndex(seg.x, seg.y);
-                const cell = gameState.cellElements[idx];
-                cell.classList.add('snake');
-                if (i === 0) {
-                    cell.classList.add('head', characters[gameState.charIdx].color);
-                }
-            });
+                gameState.cellElements[idx].classList.add('snake');
+            }
+        
+            // Draw head with image
+            const head = gameState.snake[0];
+            const headIdx = getIndex(head.x, head.y);
+            const headCell = gameState.cellElements[headIdx];
+            
+            headCell.classList.add('snake', 'head', characters[gameState.charIdx].color);
+    
+            const img = document.createElement('img');
+            img.src = characters[gameState.charIdx].image; // e.g., 'dashamoolam.jpg'
+            img.alt = characters[gameState.charIdx].name;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            img.style.display = 'block';
+    
+            // Optional: fallback if image fails
+            img.onerror = function() {
+                this.style.display = 'none';
+                headCell.style.backgroundColor = ''; // Let CSS handle fallback
+            };
+    
+            headCell.appendChild(img);
         }
 
         function endGame() {
