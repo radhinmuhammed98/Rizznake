@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Rizznake - Game On!</title>
+    <meta name="description" content="Play Rizznake with your chosen character. Retro snake game with personality!">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="author" content="Radhin">
+    <meta name="theme-color" content="#8b9c85">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #8b9c85;
+            --screen-color: #9cb094;
+            --snake-body: #2d3328;
+            --snake-head-dash: #e5c53d;
+            --snake-head-vasu: #a83636;
+            --snake-head-sayip: #3d6cb5;
+            --food-color: #1a1f16;
+            --text-color: #1a1f16;
+            --border-color: #1a1f16;
+        }
+
+        * { box-sizing: border-box; touch-action: manipulation; }
+        
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            position: relative;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn {
+            background: var(--snake-body);
+            color: var(--screen-color);
+            border: 3px solid var(--border-color);
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0 var(--border-color);
+            text-decoration: none;
+        }
+        
+        .back-btn:active { 
+            transform: translate(2px, 2px); 
+            box-shadow: 1px 1px 0 var(--border-color); 
+        }
+
+        .game-wrapper {
+            position: relative;
+            border: 10px solid var(--border-color);
+            background-color: var(--screen-color);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            max-width: 100%;
+            width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1.25 / 1; /* 20x16 grid ratio */
+            max-height: 350px;
+        }
+
+        .cell {
+            position: absolute;
+            background: transparent;
+        }
+
+        .cell.snake { 
+            background-color: var(--snake-body); 
+            border-radius: 2px; 
+        }
+        
+        .cell.snake.head.char-0 { background-color: var(--snake-head-dash); border: 1px solid #000; }
+        .cell.snake.head.char-1 { background-color: var(--snake-head-vasu); border: 1px solid #000; }
+        .cell.snake.head.char-2 { background-color: var(--snake-head-sayip); border: 1px solid #000; }
+        
+        .cell.food { 
+            background-color: var(--food-color); 
+            border-radius: 50%; 
+            animation: pulse 1s infinite; 
+        }
+        @keyframes pulse { 0%,100% { transform: scale(0.8); } 50% { transform: scale(1.1); } }
+
+        .hud {
+            display: flex; justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        #game-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(139,156,133,0.92);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .overlay-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .game-btn {
+            background: var(--snake-body);
+            color: var(--screen-color);
+            border: 3px solid var(--border-color);
+            padding: 10px 15px;
+            margin: 0 5px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0 var(--border-color);
+            min-width: 100px;
+        }
+        .game-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border-color); }
+
+        .char-display {
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        #char-name-0 { color: var(--snake-head-dash); }
+        #char-name-1 { color: var(--snake-head-vasu); }
+        #char-name-2 { color: var(--snake-head-sayip); }
+
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            opacity: 0.6;
+            font-family: monospace;
+        }
+
+        .mute-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.8;
+            z-index: 5;
+        }
+        .mute-btn:hover { opacity: 1; }
+
+        .ad-container {
+            width: 100%;
+            max-width: 400px;
+            height: 50px; 
+            background: rgba(0,0,0,0.05); 
+            margin-top: 10px; 
+            font-size: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: var(--text-color);
+        }
+
+        .controls-info {
+            font-size: 10px;
+            opacity: 0.8;
+            margin-top: 10px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <a href="index.html" class="back-btn">MENU</a>
+        <div class="mute-btn" id="muteBtn">🔊</div>
+    </div>
+
+    <div class="hud">
+        <span>SCORE: <span id="scoreVal">0</span></span>
+        <span>BEST: <span id="bestVal">0</span></span>
+    </div>
+
+    <div class="game-wrapper">
+        <div id="board" class="board"></div>
+        <div id="game-overlay" class="hidden">
+            <h2 id="overlay-msg">GAME OVER</h2>
+            <div class="char-display">
+                <span id="char-name-0" class="hidden">DASHAMOOLAM FAILED!</span>
+                <span id="char-name-1" class="hidden">VASU FAILED!</span>
+                <span id="char-name-2" class="hidden">SAYIP FAILED!</span>
+            </div>
+            <div class="overlay-btns">
+                <button class="game-btn" onclick="resetGame()">RESTART</button>
+                <button class="game-btn" onclick="location.href='index.html'">MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-info">
+        Use Arrow Keys or Swipe to Control
+    </div>
+
+    <div class="ad-container">
+        Ad Space (Google AdSense Ready)
+    </div>
+    
+    <div class="watermark">Rizznake © 2024 | Created by Radhin</div>
+
+    <script>
+        // ================== CONFIG ==================
+        const GRID_W = 20;
+        const GRID_H = 16;
+        const BASE_SPEED = 130; // ms
+
+        const characters = [
+            { name: "Dashamoolam", color: "char-0", eatFreq: 600, dieFreq: 150 },
+            { name: "Vasu", color: "char-1", eatFreq: 800, dieFreq: 120 },
+            { name: "Sayip", color: "char-2", eatFreq: 1000, dieFreq: 100 }
+        ];
+
+        // ================== STATE ==================
+        let gameState = {
+            snake: [],
+            dir: {x:0, y:-1},
+            nextDir: {x:0, y:-1},
+            food: {x:0,y:0},
+            score: 0,
+            bestScore: 0,
+            charIdx: 0,
+            running: false,
+            muted: false,
+            cellElements: [], // for performance
+            boardEl: null,
+            lastTime: 0
+        };
+
+        let audioCtx = null;
+
+        // ================== INIT ==================
+        function init() {
+            // Get character from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            gameState.charIdx = parseInt(urlParams.get('char')) || 0;
+            
+            // Set character display
+            document.querySelectorAll('.char-display span').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`char-name-${gameState.charIdx}`).classList.remove('hidden');
+            
+            gameState.boardEl = document.getElementById('board');
+            setupBoardDOM();
+            bindEvents();
+            loadScores();
+            loadMuteState();
+            resetGame();
+        }
+
+        function setupBoardDOM() {
+            gameState.cellElements = [];
+            const board = gameState.boardEl;
+            board.innerHTML = '';
+            
+            // Calculate cell size based on board dimensions
+            for (let y = 0; y < GRID_H; y++) {
+                for (let x = 0; x < GRID_W; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.left = (x * (100/GRID_W)) + '%';
+                    cell.style.top = (y * (100/GRID_H)) + '%';
+                    cell.style.width = (100/GRID_W) + '%';
+                    cell.style.height = (100/GRID_H) + '%';
+                    board.appendChild(cell);
+                    gameState.cellElements.push(cell);
+                }
+            }
+        }
+
+        function getIndex(x, y) {
+            return y * GRID_W + x;
+        }
+
+        // ================== AUDIO ==================
+        function play(freq, duration = 0.1, type = 'sine', volume = 0.1) {
+            if (gameState.muted || typeof AudioContext === 'undefined') return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.value = volume;
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) { /* silent fail */ }
+        }
+
+        function playEat() { 
+            const char = characters[gameState.charIdx];
+            play(char.eatFreq, 0.1, 'sine', 0.2); 
+        }
+        function playDie() { 
+            const char = characters[gameState.charIdx];
+            play(char.dieFreq, 0.5, 'sawtooth', 0.3); 
+        }
+
+        // ================== SCORE MANAGEMENT ==================
+        function loadScores() {
+            const savedBest = localStorage.getItem(`rizznake_best_${gameState.charIdx}`);
+            gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
+            document.getElementById('bestVal').textContent = gameState.bestScore;
+        }
+
+        function saveScore() {
+            if (gameState.score > gameState.bestScore) {
+                gameState.bestScore = gameState.score;
+                localStorage.setItem(`rizznake_best_${gameState.charIdx}`, gameState.bestScore);
+                document.getElementById('bestVal').textContent = gameState.bestScore;
+            }
+        }
+
+        // ================== GAME ==================
+        function goHome() {
+            gameState.running = false;
+            location.href = 'index.html';
+        }
+
+        function resetGame() {
+            setupBoardDOM(); // clear visuals
+            gameState.snake = [{x:10,y:8}, {x:10,y:9}, {x:10,y:10}];
+            gameState.dir = {x:0, y:-1};
+            gameState.nextDir = {x:0, y:-1};
+            gameState.score = 0;
+            document.getElementById('scoreVal').textContent = '0';
+            gameState.running = true;
+            document.getElementById('game-overlay').classList.add('hidden');
+            placeFood();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function placeFood() {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * GRID_W);
+                y = Math.floor(Math.random() * GRID_H);
+            } while (gameState.snake.some(s => s.x === x && s.y === y));
+            gameState.food = {x, y};
+        }
+
+        function gameLoop(ts) {
+            if (!gameState.running) return;
+            requestAnimationFrame(gameLoop);
+            const now = ts || performance.now();
+            if (!gameState.lastTime) gameState.lastTime = now;
+            if (now - gameState.lastTime < BASE_SPEED) return;
+            gameState.lastTime = now;
+
+            update();
+            render();
+        }
+
+        function update() {
+            // Apply next direction (with anti-reversal)
+            if (gameState.nextDir.x !== -gameState.dir.x || gameState.nextDir.y !== -gameState.dir.y) {
+                gameState.dir = {...gameState.nextDir};
+            }
+
+            const head = gameState.snake[0];
+            const newHead = {
+                x: head.x + gameState.dir.x,
+                y: head.y + gameState.dir.y
+            };
+
+            // Wall collision
+            if (newHead.x < 0 || newHead.x >= GRID_W || newHead.y < 0 || newHead.y >= GRID_H) {
+                endGame(); return;
+            }
+
+            // Self collision
+            if (gameState.snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                endGame(); return;
+            }
+
+            gameState.snake.unshift(newHead);
+
+            // Food?
+            if (newHead.x === gameState.food.x && newHead.y === gameState.food.y) {
+                gameState.score += 10;
+                document.getElementById('scoreVal').textContent = gameState.score;
+                playEat();
+                placeFood();
+            } else {
+                gameState.snake.pop();
+            }
+        }
+
+        function render() {
+            // Reset all cells
+            for (let el of gameState.cellElements) {
+                el.className = 'cell';
+            }
+
+            // Draw food
+            const foodIdx = getIndex(gameState.food.x, gameState.food.y);
+            gameState.cellElements[foodIdx].classList.add('food');
+
+            // Draw snake
+            gameState.snake.forEach((seg, i) => {
+                const idx = getIndex(seg.x, seg.y);
+                const cell = gameState.cellElements[idx];
+                cell.classList.add('snake');
+                if (i === 0) {
+                    cell.classList.add('head', characters[gameState.charIdx].color);
+                }
+            });
+        }
+
+        function endGame() {
+            gameState.running = false;
+            playDie();
+            saveScore();
+            document.getElementById('overlay-msg').textContent = "GAME OVER";
+            document.getElementById('game-overlay').classList.remove('hidden');
+        }
+
+        // ================== INPUT ==================
+        function handleKey(e) {
+            if (!gameState.running) return;
+            const key = e.key;
+            if (key === 'ArrowUp' && gameState.dir.y === 0) gameState.nextDir = {x:0, y:-1};
+            if (key === 'ArrowDown' && gameState.dir.y === 0) gameState.nextDir = {x:0, y:1};
+            if (key === 'ArrowLeft' && gameState.dir.x === 0) gameState.nextDir = {x:-1, y:0};
+            if (key === 'ArrowRight' && gameState.dir.x === 0) gameState.nextDir = {x:1, y:0};
+        }
+
+        // Touch gestures
+        let touchStart = {x:0, y:0};
+        function handleTouchStart(e) {
+            if (!gameState.running) return;
+            const t = e.touches[0];
+            touchStart.x = t.clientX;
+            touchStart.y = t.clientY;
+        }
+        function handleTouchEnd(e) {
+            if (!gameState.running) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - touchStart.x;
+            const dy = t.clientY - touchStart.y;
+            const absDx = Math.abs(dx), absDy = Math.abs(dy);
+            if (absDx < 20 && absDy < 20) return; // noise
+            if (absDx > absDy) {
+                if (dx > 0 && gameState.dir.x === 0) gameState.nextDir = {x:1, y:0};
+                if (dx < 0 && gameState.dir.x === 0) gameState.nextDir = {x:-1, y:0};
+            } else {
+                if (dy > 0 && gameState.dir.y === 0) gameState.nextDir = {x:0, y:1};
+                if (dy < 0 && gameState.dir.y === 0) gameState.nextDir = {x:0, y:-1};
+            }
+        }
+
+        // ================== MUTE ==================
+        function toggleMute() {
+            gameState.muted = !gameState.muted;
+            document.getElementById('muteBtn').textContent = gameState.muted ? '🔇' : '🔊';
+            localStorage.setItem('rizznake_muted', gameState.muted ? '1' : '0');
+        }
+
+        function loadMuteState() {
+            gameState.muted = localStorage.getItem('rizznake_muted') === '1';
+            document.getElementById('muteBtn').textContent = gameState.muted ? '🔇' : '🔊';
+        }
+
+        // ================== BINDINGS ==================
+        function bindEvents() {
+            window.addEventListener('keydown', handleKey);
+            document.addEventListener('touchstart', handleTouchStart, {passive: false});
+            document.addEventListener('touchend', handleTouchEnd, {passive: false});
+            document.getElementById('muteBtn').addEventListener('click', toggleMute);
+        }
+
+        // ================== START GAME ==================
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
