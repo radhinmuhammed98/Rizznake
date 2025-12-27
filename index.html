@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Rizznake — Claim Your Rizz</title>
-    <meta name="description" content="Choose your name, pick your rizz style, and climb the global leaderboard.">
+    <title>Rizznake — Retro Snake with Rizz</title>
+    <meta name="description" content="Choose your rizz style, set your name, and climb the global leaderboard.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Radhin">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500&display=swap" rel="stylesheet">
@@ -45,13 +45,13 @@
 
         .container { width: 100%; max-width: 520px; }
 
-        /* Name Setup Modal */
+        /* Name Modal */
         #nameModal {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: rgba(10, 20, 10, 0.95);
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -71,7 +71,7 @@
         }
 
         .modal-content h2 {
-            font-size: 20px;
+            font-size: 18px;
             margin-bottom: 20px;
             color: #aaffaa;
         }
@@ -102,9 +102,6 @@
         }
         .name-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* Main UI (hidden until name set) */
-        #mainContent { display: none; }
-
         .header {
             text-align: center;
             margin: 20px 0 25px;
@@ -121,10 +118,12 @@
             margin-bottom: 8px;
         }
 
-        .player-tag {
+        /* Player name tag (shown after name is set) */
+        #playerTag {
             font-size: 14px;
             opacity: 0.8;
             margin-bottom: 15px;
+            display: none;
         }
 
         .grid {
@@ -211,19 +210,12 @@
             border-radius: 4px;
         }
 
-        .lb-rank {
-            width: 24px;
-            text-align: center;
-            font-weight: bold;
-            color: gold;
-        }
-        .lb-rank:nth-child(2) { color: silver; }
-        .lb-rank:nth-child(3) { color: #cd7f32; }
+        .lb-rank { width: 24px; text-align: center; font-weight: bold; }
 
         .watermark {
             position: absolute;
             bottom: 12px;
-            left: 50%;
+            left: 5,0%;
             transform: translateX(-50%);
             font-size: 11px;
             opacity: 0.5;
@@ -231,27 +223,27 @@
     </style>
 </head>
 <body>
-    <!-- Name Entry Modal -->
+    <!-- Name Entry Modal (hidden by default) -->
     <div id="nameModal">
         <div class="modal-content">
             <h2>SET YOUR RIZZ NAME</h2>
             <input type="text" id="playerName" class="name-input" placeholder="e.g., SnakeMaster" maxlength="15">
-            <button class="name-btn" onclick="setPlayerName()">PLAY →</button>
+            <button class="name-btn" onclick="confirmName()">CONFIRM →</button>
             <div style="font-size:8px; margin-top:15px; opacity:0.6;">
-                Your name is saved locally. No login needed.
+                Name saved locally. No login needed.
             </div>
         </div>
     </div>
 
-    <!-- Main Game UI -->
-    <div id="mainContent" class="container">
+    <!-- Main UI -->
+    <div class="container">
         <div class="header">
             <h1 class="logo">RIZZNAKE</h1>
-            <div class="player-tag">PLAYING AS: <span id="displayName">Player</span></div>
+            <div id="playerTag">PLAYING AS: <span id="displayName">Guest</span></div>
         </div>
 
         <div class="grid">
-            <div class="char-card char-0" onclick="play(0)">
+            <div class="char-card char-0" onclick="selectChar(0)">
                 <div class="char-img">
                     <img src="dashamoolam.jpg" alt="Dashamoolam">
                     <div class="fallback">DMIN</div>
@@ -260,7 +252,7 @@
                 <div class="char-desc">Chill</div>
             </div>
 
-            <div class="char-card char-1" onclick="play(1)">
+            <div class="char-card char-1" onclick="selectChar(1)">
                 <div class="char-img">
                     <img src="vasu.jpg" alt="Vasu">
                     <div class="fallback">V</div>
@@ -269,7 +261,7 @@
                 <div class="char-desc">Aggressive</div>
             </div>
 
-            <div class="char-card char-2" onclick="play(2)">
+            <div class="char-card char-2" onclick="selectChar(2)">
                 <div class="char-img">
                     <img src="sayip.jpg" alt="Sayip">
                     <div class="fallback">S</div>
@@ -291,43 +283,46 @@
 
     <script>
         // === CONFIG ===
-        const API_BASE = '/api'; // Change to your actual API URL if needed
+        const API_BASE = 'https://your-infinityfree-site.000webhostapp.com/api/player.php';
+        let selectedChar = null;
 
         // === INIT ===
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if player already has a name
+            const savedName = localStorage.getItem('rizznake_display_name');
+            if (savedName) {
+                document.getElementById('displayName').textContent = savedName;
+                document.getElementById('playerTag').style.display = 'block';
+            }
+            loadLeaderboard();
+        });
 
-        async function initApp() {
-            const storedUserId = localStorage.getItem('rizznake_user_id');
-            const storedName = localStorage.getItem('rizznake_display_name');
-
-            if (storedUserId && storedName) {
-                // Player exists
-                document.getElementById('displayName').textContent = storedName;
-                document.getElementById('nameModal').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                loadLeaderboard();
+        // === CHARACTER SELECTION ===
+        function selectChar(charIdx) {
+            selectedChar = charIdx;
+            
+            const savedName = localStorage.getItem('rizznake_display_name');
+            if (savedName) {
+                // Name already set → go to game
+                startGame();
             } else {
                 // Show name modal
+                document.getElementById('nameModal').style.display = 'flex';
                 document.getElementById('playerName').focus();
             }
         }
 
-        // === NAME SETUP ===
-        function setPlayerName() {
+        // === NAME SUBMISSION ===
+        function confirmName() {
             const input = document.getElementById('playerName');
             let name = input.value.trim();
 
-            if (!name) {
-                alert('Please enter a name!');
+            if (!name || name.length < 2 || name.length > 15) {
+                alert('Name must be 2-15 characters.');
                 return;
             }
 
-            if (name.length < 2) {
-                alert('Name must be at least 2 characters.');
-                return;
-            }
-
-            // Generate UUID v4 (anonymous ID)
+            // Generate UUID (anonymous ID)
             const userId = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
             );
@@ -342,7 +337,7 @@
 
         async function registerPlayer(userId, name) {
             try {
-                const res = await fetch(`${API_BASE}/player/init`, {
+                const res = await fetch(`${API_BASE}?action=init`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, display_name: name })
@@ -350,31 +345,27 @@
 
                 if (res.ok) {
                     document.getElementById('displayName').textContent = name;
+                    document.getElementById('playerTag').style.display = 'block';
                     document.getElementById('nameModal').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
-                    loadLeaderboard();
+                    startGame();
                 } else {
-                    alert('Error saving name. Please try again.');
+                    const err = await res.json();
+                    alert('Error: ' + (err.error || 'Failed to save name'));
                 }
             } catch (e) {
-                console.error('Registration failed:', e);
                 alert('Network error. Check connection.');
             }
         }
 
-        // === GAME START ===
-        function play(charIdx) {
+        function startGame() {
             const userId = localStorage.getItem('rizznake_user_id');
-            if (!userId) return;
-            
-            // Pass user_id and char to game
-            window.location.href = `game.html?char=${charIdx}&user_id=${encodeURIComponent(userId)}`;
+            window.location.href = `game.html?char=${selectedChar}&user_id=${encodeURIComponent(userId)}`;
         }
 
         // === LEADERBOARD ===
         async function loadLeaderboard() {
             try {
-                const res = await fetch(`${API_BASE}/leaderboard`);
+                const res = await fetch(`${API_BASE}?action=leaderboard`);
                 const scores = await res.json();
 
                 const container = document.getElementById('leaderboardEntries');
@@ -390,13 +381,12 @@
                     </div>
                 `).join('');
             } catch (e) {
-                console.error('Leaderboard load failed:', e);
                 document.getElementById('leaderboardEntries').innerHTML = 
                     '<div style="text-align:center; opacity:0.6;">Offline</div>';
             }
         }
 
-        // Auto-refresh every 15 sec
+        // Refresh every 15 sec
         setInterval(loadLeaderboard, 15000);
     </script>
 </body>
