@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Rizznake — Retro Snake with Rizz</title>
-    <meta name="description" content="A modern retro twist on Snake. Choose your persona, chase glory, and dominate the leaderboard.">
+    <title>Rizznake — Claim Your Rizz</title>
+    <meta name="description" content="Choose your name, pick your rizz style, and climb the global leaderboard.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Radhin">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500&display=swap" rel="stylesheet">
@@ -32,76 +32,105 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(29, 45, 29, 0.3) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(29, 45, 29, 0.3) 0%, transparent 40%);
         }
 
-        /* Retro CRT scanlines */
         body::after {
             content: '';
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0,20,0,0.08) 0px,
-                rgba(0,20,0,0.08) 1px,
-                transparent 1px,
-                transparent 2px
-            );
+            background: repeating-linear-gradient(0deg, rgba(0,20,0,0.08) 0px, transparent 2px);
             pointer-events: none;
-            z-index: 2;
         }
+
+        .container { width: 100%; max-width: 520px; }
+
+        /* Name Setup Modal */
+        #nameModal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(10, 20, 10, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        .modal-content h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #aaffaa;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--border);
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .name-btn {
+            background: var(--panel);
+            color: var(--text);
+            border: 2px solid var(--border);
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+        .name-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* Main UI (hidden until name set) */
+        #mainContent { display: none; }
 
         .header {
             text-align: center;
-            margin: 20px 0 30px;
-            position: relative;
+            margin: 20px 0 25px;
         }
 
         .logo {
-            font-size: 38px;
+            font-size: 36px;
             letter-spacing: -1px;
-            text-shadow: 
-                0 0 8px var(--glow),
-                3px 3px 0 var(--border);
             font-family: 'Orbitron', sans-serif;
-            font-weight: 500;
-            margin-bottom: 8px;
             background: linear-gradient(90deg, #fff, #aaffaa);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            margin-bottom: 8px;
         }
 
-        .subtitle {
-            font-size: 12px;
-            opacity: 0.7;
-            max-width: 400px;
-            line-height: 1.5;
+        .player-tag {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 15px;
         }
-
-        /* Snake trail animation */
-        .trail {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 6px;
-        }
-        .dot { width: 6px; height: 6px; background: #aaffaa; border-radius: 50%; animation: trail 1.2s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes trail { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 22px;
-            width: 100%;
-            max-width: 520px;
             margin-bottom: 25px;
         }
 
@@ -112,45 +141,30 @@
             padding: 18px 12px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
         }
 
         .char-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-5px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.5), 0 0 12px var(--glow);
-            z-index: 3;
         }
 
         .char-img {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             margin: 0 auto 12px;
             border-radius: 50%;
             overflow: hidden;
             border: 2px solid var(--border);
-            position: relative;
-            transition: transform 0.2s;
         }
 
-        .char-card:hover .char-img {
-            transform: scale(1.05);
-        }
-
-        .char-img img {
+        .char-img img, .char-img .fallback {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .char-img.fallback {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: bold;
             color: white;
         }
@@ -168,19 +182,11 @@
         .char-1 .char-name { color: var(--vasu); }
         .char-2 .char-name { color: var(--sayip); }
 
-        .char-desc {
-            font-size: 10px;
-            opacity: 0.75;
-        }
-
-        /* Leaderboard */
         .leaderboard {
             background: rgba(20, 35, 20, 0.7);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
-            width: 100%;
-            max-width: 520px;
             margin-bottom: 20px;
         }
 
@@ -189,7 +195,6 @@
             font-size: 14px;
             margin-bottom: 12px;
             color: #aaffaa;
-            text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
         }
 
         .lb-entries {
@@ -210,18 +215,10 @@
             width: 24px;
             text-align: center;
             font-weight: bold;
+            color: gold;
         }
-        .rank-1 { color: gold; }
-        .rank-2 { color: silver; }
-        .rank-3 { color: #cd7f32; }
-
-        .how-to {
-            font-size: 10px;
-            opacity: 0.6;
-            text-align: center;
-            margin-top: auto;
-            padding: 0 10px;
-        }
+        .lb-rank:nth-child(2) { color: silver; }
+        .lb-rank:nth-child(3) { color: #cd7f32; }
 
         .watermark {
             position: absolute;
@@ -230,134 +227,177 @@
             transform: translateX(-50%);
             font-size: 11px;
             opacity: 0.5;
-            font-family: 'Courier New', monospace;
-        }
-
-        @media (max-width: 480px) {
-            .logo { font-size: 28px; }
-            .char-img { width: 80px; height: 80px; font-size: 30px; }
-            .grid { gap: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="trail">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-    </div>
-
-    <div class="header">
-        <h1 class="logo">RIZZNAKE</h1>
-        <p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot on the leaderboard.</p>
-    </div>
-
-    <div class="grid">
-        <div class="char-card char-0" onclick="play(0)">
-            <div class="char-img">
-                <img src="dashamoolam.jpg" alt="Dashamoolam">
-                <div class="fallback">DMIN</div>
+    <!-- Name Entry Modal -->
+    <div id="nameModal">
+        <div class="modal-content">
+            <h2>SET YOUR RIZZ NAME</h2>
+            <input type="text" id="playerName" class="name-input" placeholder="e.g., SnakeMaster" maxlength="15">
+            <button class="name-btn" onclick="setPlayerName()">PLAY →</button>
+            <div style="font-size:8px; margin-top:15px; opacity:0.6;">
+                Your name is saved locally. No login needed.
             </div>
-            <div class="char-name">DASHAMOOLAM</div>
-            <div class="char-desc">Chill • Minimal • Focused</div>
-        </div>
-
-        <div class="char-card char-1" onclick="play(1)">
-            <div class="char-img">
-                <img src="vasu.jpg" alt="Vasu">
-                <div class="fallback">V</div>
-            </div>
-            <div class="char-name">VASU</div>
-            <div class="char-desc">Aggressive • Bold • Fast</div>
-        </div>
-
-        <div class="char-card char-2" onclick="play(2)">
-            <div class="char-img">
-                <img src="sayip.jpg" alt="Sayip">
-                <div class="fallback">S</div>
-            </div>
-            <div class="char-name">SAYIP</div>
-            <div class="char-desc">Chaos • Unpredictable • Wild</div>
         </div>
     </div>
 
-    <div class="leaderboard">
-        <div class="lb-title">GLOBAL RIZZ RANKINGS</div>
-        <div class="lb-entries" id="leaderboardEntries">
-            <!-- Filled by JS -->
+    <!-- Main Game UI -->
+    <div id="mainContent" class="container">
+        <div class="header">
+            <h1 class="logo">RIZZNAKE</h1>
+            <div class="player-tag">PLAYING AS: <span id="displayName">Player</span></div>
         </div>
-    </div>
 
-    <div class="how-to">← → ↑ ↓ Arrow Keys | Swipe on Mobile</div>
-    <div class="watermark">Rizznake © Radhin • 2024</div>
+        <div class="grid">
+            <div class="char-card char-0" onclick="play(0)">
+                <div class="char-img">
+                    <img src="dashamoolam.jpg" alt="Dashamoolam">
+                    <div class="fallback">DMIN</div>
+                </div>
+                <div class="char-name">DASHAMOOLAM</div>
+                <div class="char-desc">Chill</div>
+            </div>
+
+            <div class="char-card char-1" onclick="play(1)">
+                <div class="char-img">
+                    <img src="vasu.jpg" alt="Vasu">
+                    <div class="fallback">V</div>
+                </div>
+                <div class="char-name">VASU</div>
+                <div class="char-desc">Aggressive</div>
+            </div>
+
+            <div class="char-card char-2" onclick="play(2)">
+                <div class="char-img">
+                    <img src="sayip.jpg" alt="Sayip">
+                    <div class="fallback">S</div>
+                </div>
+                <div class="char-name">SAYIP</div>
+                <div class="char-desc">Chaos</div>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <div class="lb-title">GLOBAL LEADERBOARD</div>
+            <div class="lb-entries" id="leaderboardEntries">
+                <div style="text-align:center; opacity:0.6;">Loading...</div>
+            </div>
+        </div>
+
+        <div class="watermark">Rizznake © Radhin</div>
+    </div>
 
     <script>
-        // Show image if loads, else show fallback
-        document.querySelectorAll('.char-img img').forEach(img => {
-            img.onload = function() {
-                this.style.display = 'block';
-                this.nextElementSibling.style.display = 'none';
-            };
-            img.onerror = function() {
-                this.style.display = 'none';
-            };
-        });
+        // === CONFIG ===
+        const API_BASE = '/api'; // Change to your actual API URL if needed
 
-        function play(charIdx) {
-            window.location.href = `game.html?char=${charIdx}`;
-        }
+        // === INIT ===
+        document.addEventListener('DOMContentLoaded', initApp);
 
-        // === LEADERBOARD SYSTEM ===
-        function getTopScores() {
-            const allScores = [];
-            const chars = ['Dashamoolam', 'Vasu', 'Sayip'];
-            
-            for (let i = 0; i < 3; i++) {
-                const best = localStorage.getItem(`rizznake_best_${i}`);
-                if (best) {
-                    allScores.push({
-                        char: chars[i],
-                        score: parseInt(best),
-                        charIdx: i
-                    });
-                }
+        async function initApp() {
+            const storedUserId = localStorage.getItem('rizznake_user_id');
+            const storedName = localStorage.getItem('rizznake_display_name');
+
+            if (storedUserId && storedName) {
+                // Player exists
+                document.getElementById('displayName').textContent = storedName;
+                document.getElementById('nameModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                loadLeaderboard();
+            } else {
+                // Show name modal
+                document.getElementById('playerName').focus();
             }
-            
-            // Sort by score (desc)
-            allScores.sort((a, b) => b.score - a.score);
-            return allScores.slice(0, 6); // Top 6
         }
 
-        function renderLeaderboard() {
-            const container = document.getElementById('leaderboardEntries');
-            const scores = getTopScores();
-            
-            if (scores.length === 0) {
-                container.innerHTML = '<div class="lb-entry" style="text-align:center;opacity:0.6;">No scores yet</div>';
+        // === NAME SETUP ===
+        function setPlayerName() {
+            const input = document.getElementById('playerName');
+            let name = input.value.trim();
+
+            if (!name) {
+                alert('Please enter a name!');
                 return;
             }
 
-            container.innerHTML = scores.map((entry, idx) => {
-                const rankClass = idx < 3 ? `rank-${idx + 1}` : '';
-                const charColors = ['#e5c53d', '#a83636', '#3d6cb5'];
-                const color = charColors[entry.charIdx] || '#fff';
-                
-                return `
-                    <div class="lb-entry">
-                        <span class="lb-rank ${rankClass}">#${idx + 1}</span>
-                        <span>${entry.char} (${entry.score})</span>
-                    </div>
-                `;
-            }).join('');
+            if (name.length < 2) {
+                alert('Name must be at least 2 characters.');
+                return;
+            }
+
+            // Generate UUID v4 (anonymous ID)
+            const userId = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+
+            // Save locally
+            localStorage.setItem('rizznake_user_id', userId);
+            localStorage.setItem('rizznake_display_name', name);
+
+            // Register with server
+            registerPlayer(userId, name);
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            renderLeaderboard();
+        async function registerPlayer(userId, name) {
+            try {
+                const res = await fetch(`${API_BASE}/player/init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, display_name: name })
+                });
+
+                if (res.ok) {
+                    document.getElementById('displayName').textContent = name;
+                    document.getElementById('nameModal').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    loadLeaderboard();
+                } else {
+                    alert('Error saving name. Please try again.');
+                }
+            } catch (e) {
+                console.error('Registration failed:', e);
+                alert('Network error. Check connection.');
+            }
+        }
+
+        // === GAME START ===
+        function play(charIdx) {
+            const userId = localStorage.getItem('rizznake_user_id');
+            if (!userId) return;
             
-            // Optional: refresh leaderboard every 10 sec (if game updates in another tab)
-            setInterval(renderLeaderboard, 10000);
-        });
+            // Pass user_id and char to game
+            window.location.href = `game.html?char=${charIdx}&user_id=${encodeURIComponent(userId)}`;
+        }
+
+        // === LEADERBOARD ===
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch(`${API_BASE}/leaderboard`);
+                const scores = await res.json();
+
+                const container = document.getElementById('leaderboardEntries');
+                if (!scores.length) {
+                    container.innerHTML = '<div style="text-align:center; opacity:0.6;">No scores yet</div>';
+                    return;
+                }
+
+                container.innerHTML = scores.map((entry, idx) => `
+                    <div class="lb-entry">
+                        <span class="lb-rank">#${idx + 1}</span>
+                        <span>${entry.name} (${entry.score})</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Leaderboard load failed:', e);
+                document.getElementById('leaderboardEntries').innerHTML = 
+                    '<div style="text-align:center; opacity:0.6;">Offline</div>';
+            }
+        }
+
+        // Auto-refresh every 15 sec
+        setInterval(loadLeaderboard, 15000);
     </script>
 </body>
 </html>
