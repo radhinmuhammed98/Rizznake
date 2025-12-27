@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Rizznake - The Ultimate Snake Game</title>
-    <meta name="description" content="Play Rizznake. Choose your character (Dashamoolam, Vasu, Sayip) and dominate the classic snake game.">
+    <title>Rizznake - Retro Snake Game</title>
+    <meta name="description" content="Play Rizznake - the retro snake game with personality! Choose your character and dominate the grid.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="author" content="Radhin">
+    <meta name="theme-color" content="#8b9c85">
     
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
@@ -16,445 +18,292 @@
             --snake-head-dash: #e5c53d; /* Yellowish */
             --snake-head-vasu: #a83636; /* Angry Red */
             --snake-head-sayip: #3d6cb5; /* Foreign Blue */
-            --food-color: #2d3328;
+            --food-color: #1a1f16;
             --text-color: #1a1f16;
+            --border-color: #1a1f16;
         }
 
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * { 
+            box-sizing: border-box; 
+            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+        }
         
         body {
-            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Press Start 2P', monospace; /* Retro Font */
+            font-family: 'Press Start 2P', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .nokia-screen {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--screen-color);
+            border: 10px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            position: relative;
             overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* --- MENUS & UI --- */
-        #home-screen, #game-screen {
+        .screen-header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .screen-header h1 {
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .screen-header::before, .screen-header::after {
+            content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s;
+            top: 50%;
+            width: 30px;
+            height: 4px;
+            background-color: var(--border-color);
+        }
+        
+        .screen-header::before {
+            left: -35px;
+        }
+        
+        .screen-header::after {
+            right: -35px;
         }
 
-        h1 { font-size: 40px; margin-bottom: 20px; text-transform: uppercase; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
-        h2 { font-size: 16px; margin-bottom: 30px; opacity: 0.8; }
+        .character-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
 
-        .btn {
+        .char-btn {
+            display: flex;
+            align-items: center;
             background: var(--snake-body);
             color: var(--screen-color);
-            border: 4px solid #1a1f16;
-            padding: 15px 20px;
-            margin: 10px;
+            border: 3px solid var(--border-color);
+            padding: 12px 15px;
             font-family: inherit;
             font-size: 14px;
             cursor: pointer;
             text-transform: uppercase;
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
-            width: 280px;
+            box-shadow: 3px 3px 0 var(--border-color);
+            transition: all 0.1s;
+            width: 100%;
         }
-
-        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
         
-        .hidden { display: none !important; }
-
-        /* Character Specific Buttons */
-        .char-btn-0:hover { border-color: var(--snake-head-dash); color: var(--snake-head-dash); }
-        .char-btn-1:hover { border-color: var(--snake-head-vasu); color: var(--snake-head-vasu); }
-        .char-btn-2:hover { border-color: var(--snake-head-sayip); color: var(--snake-head-sayip); }
-
-        /* --- GAME BOARD --- */
-        .game-wrapper {
-            position: relative;
-            border: 10px solid var(--text-color);
-            background-color: var(--screen-color);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-            padding: 5px;
+        .char-btn:active { 
+            transform: translate(2px, 2px); 
+            box-shadow: 1px 1px 0 var(--border-color); 
         }
-
-        .board {
-            position: relative;
-            width: 300px; height: 300px; /* Base size, JS adjusts logic */
+        
+        .char-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
         }
+        
+        .char-0 .char-icon { background-color: var(--snake-head-dash); }
+        .char-1 .char-icon { background-color: var(--snake-head-vasu); }
+        .char-2 .char-icon { background-color: var(--snake-head-sayip); }
 
-        .cell {
+        .game-preview {
+            height: 120px;
+            background-color: var(--snake-body);
+            border: 3px solid var(--border-color);
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .preview-snake {
             position: absolute;
-            width: 15px; height: 15px;
-            /* Grid visual helper */
-            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); 
+            width: 15px;
+            height: 15px;
+            background-color: var(--snake-body);
+            animation: previewMove 8s infinite linear;
         }
-
-        /* Snake Styling */
-        .cell.snake { background-color: var(--snake-body); border-radius: 2px; }
         
-        /* The HEAD of the snake based on character */
-        .cell.snake.head.char-0 { background-color: var(--snake-head-dash); border: 2px solid #000; } /* Dashamoolam */
-        .cell.snake.head.char-1 { background-color: var(--snake-head-vasu); border: 2px solid #000; } /* Vasu */
-        .cell.snake.head.char-2 { background-color: var(--snake-head-sayip); border: 2px solid #000; } /* Sayip */
+        @keyframes previewMove {
+            0% { left: 10px; top: 10px; }
+            25% { left: 80px; top: 10px; }
+            50% { left: 80px; top: 80px; }
+            75% { left: 10px; top: 80px; }
+            100% { left: 10px; top: 10px; }
+        }
+
+        .preview-food {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--food-color);
+            border-radius: 50%;
+            right: 20px;
+            bottom: 20px;
+            animation: pulse 1s infinite;
+        }
         
-        /* Food Styling */
-        .cell.food { 
-            background-color: var(--text-color); 
-            border-radius: 50%; 
-            animation: pulse 1s infinite; 
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
         }
 
-        @keyframes pulse { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(0.8); } }
-
-        /* HUD */
-        .hud {
-            display: flex; justify-content: space-between; width: 100%; max-width: 320px;
-            margin-bottom: 10px; font-size: 12px;
+        .about-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--border-color);
+        }
+        
+        .about-section h3 {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .dev-card {
+            background-color: rgba(255,255,255,0.1);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dev-card:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .dev-name {
+            font-size: 18px;
+            margin: 8px 0;
+            color: var(--snake-head-dash);
+        }
+        
+        .dev-desc {
+            font-size: 12px;
+            opacity: 0.8;
         }
 
-        /* Watermark & Footer */
         .watermark {
-            position: absolute; bottom: 10px; right: 10px;
-            font-size: 10px; opacity: 0.5;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            opacity: 0.6;
+            font-family: monospace;
         }
-        .adsense-privacy {
-            margin-top: 20px; font-size: 8px; text-align: center; max-width: 300px; line-height: 1.5;
-        }
-        .adsense-privacy a { color: var(--text-color); }
 
-        /* Responsive */
+        .ad-space {
+            width: 100%;
+            height: 50px;
+            background: rgba(0,0,0,0.05);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
         @media (min-width: 600px) {
-            .board { width: 500px; height: 400px; }
-            .cell { width: 25px; height: 25px; } /* 20x16 grid */
+            body {
+                padding: 40px;
+            }
+            
+            .nokia-screen {
+                max-width: 450px;
+            }
         }
-
-        /* Overlay Messages */
-        #game-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(139, 156, 133, 0.9);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10;
-        }
-
-        /* Ads Container */
-        .ad-container { width: 100%; height: 60px; background: rgba(0,0,0,0.1); margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
     </style>
 </head>
 <body>
-
-    <div id="home-screen">
-        <h1>RIZZNAKE</h1>
-        <h2>Select Character</h2>
-
-        <button class="btn char-btn-0" onclick="startGame(0)">Dashamoolam (Minimal)</button>
-        <button class="btn char-btn-1" onclick="startGame(1)">Vasu (Aggressive)</button>
-        <button class="btn char-btn-2" onclick="startGame(2)">Sayip (Chaos)</button>
-
-        <div class="adsense-privacy">
-            <p>Built by [Your Name Here]</p>
-            <p>Rizznake is a fan-made game for fun.</p>
-            <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+    <div class="nokia-screen">
+        <div class="screen-header">
+            <h1>RIZZNAKE</h1>
         </div>
         
-        <div class="ad-container">Google AdSense Space</div>
-    </div>
-
-    <div id="game-screen" class="hidden">
-        <div class="hud">
-            <span>SCORE: <span id="scoreVal">0</span></span>
-            <span id="charName">P1</span>
+        <div class="game-preview">
+            <div class="preview-snake"></div>
+            <div class="preview-food"></div>
         </div>
-
-        <div class="game-wrapper">
-            <div id="board" class="board"></div>
-            
-            <div id="game-overlay" class="hidden">
-                <h2 id="overlay-msg">GAME OVER</h2>
-                <button class="btn" onclick="resetGame()">RESTART</button>
-                <button class="btn" onclick="goHome()">HOME</button>
+        
+        <div class="info-text" style="text-align: center; font-size: 12px; margin-bottom: 15px; line-height: 1.4;">
+            Guide the snake to eat food. Don't hit walls or your tail!<br>
+            Use arrow keys or swipe to control.
+        </div>
+        
+        <div class="character-selection">
+            <button class="char-btn char-0" onclick="location.href='game.html?char=0'">
+                <div class="char-icon">DMIN</div>
+                <div>DASHAMOOLAM<br><span style="font-size:10px;opacity:0.8;">(Chill Mode)</span></div>
+            </button>
+            <button class="char-btn char-1" onclick="location.href='game.html?char=1'">
+                <div class="char-icon">V</div>
+                <div>VASU<br><span style="font-size:10px;opacity:0.8;">(Aggressive)</span></div>
+            </button>
+            <button class="char-btn char-2" onclick="location.href='game.html?char=2'">
+                <div class="char-icon">S</div>
+                <div>SAYIP<br><span style="font-size:10px;opacity:0.8;">(Chaos Mode)</span></div>
+            </button>
+        </div>
+        
+        <div class="about-section">
+            <h3>MEET THE DEVELOPER</h3>
+            <div class="dev-card" onclick="window.open('https://www.instagram.com/radhin.inc/', '_blank')">
+                <div style="font-size: 32px;">👨‍💻</div>
+                <div class="dev-name">RADHIN</div>
+                <div class="dev-desc">Game Developer & Rizz Master</div>
             </div>
         </div>
-
-        <div style="margin-top: 20px; opacity: 0.6; font-size: 10px;">
-            Swipe to Move / Arrow Keys
+        
+        <div class="ad-space">
+            Ad Space (Google AdSense Ready)
         </div>
-
-        <div class="watermark">Rizznake © 2024</div>
     </div>
+    
+    <div class="watermark">Rizznake © 2024 | Created by Radhin</div>
 
     <script>
-        // --- GAME CONFIGURATION ---
-        const config = {
-            gridX: 20, // Width in cells
-            gridY: 16, // Height in cells
-            speed: 120 // Milliseconds per frame (lower is faster)
-        };
-
-        const characters = [
-            { name: "Dashamoolam", colorClass: "char-0", soundType: "sine", pitch: 1 },
-            { name: "Vasu Annan", colorClass: "char-1", soundType: "sawtooth", pitch: 0.5 },
-            { name: "Sayip", colorClass: "char-2", soundType: "square", pitch: 2.0 }
-        ];
-
-        // --- STATE ---
-        let state = {
-            snake: [],
-            direction: { x: 0, y: 0 },
-            nextDirection: { x: 0, y: 0 },
-            food: { x: 0, y: 0 },
-            score: 0,
-            running: false,
-            paused: false,
-            characterIndex: 0,
-            lastRender: 0
-        };
-
-        let audioCtx = null;
-
-        // --- DOM ELEMENTS ---
-        const boardEl = document.getElementById('board');
-        const scoreEl = document.getElementById('scoreVal');
-        const charNameEl = document.getElementById('charName');
-        const overlayEl = document.getElementById('game-overlay');
-        const overlayMsg = document.getElementById('overlay-msg');
-        const homeScreen = document.getElementById('home-screen');
-        const gameScreen = document.getElementById('game-screen');
-
-        // --- AUDIO ENGINE (Browser Synth) ---
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        function playSound(type) {
-            if (!audioCtx) initAudio();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            const char = characters[state.characterIndex];
-            
-            // Apply character personality to sound
-            osc.type = char.soundType; 
-            
-            let frequency = 440;
-            let duration = 0.1;
-
-            if (type === 'eat') {
-                frequency = 600 * char.pitch;
-                duration = 0.1;
-            } else if (type === 'die') {
-                frequency = 150 * char.pitch;
-                duration = 0.5;
-                osc.type = 'sawtooth'; // Always harsh for death
-            } else if (type === 'move') {
-                // Very quiet click
-                frequency = 100;
-                duration = 0.05;
-                gainNode.gain.value = 0.1;
-            }
-
-            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            if(type === 'eat') osc.frequency.exponentialRampToValueAtTime(frequency * 2, audioCtx.currentTime + duration);
-            if(type === 'die') osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + duration);
-
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        // --- GAME LOGIC ---
-
-        function startGame(charIndex) {
-            initAudio();
-            state.characterIndex = charIndex;
-            charNameEl.textContent = characters[charIndex].name;
-            
-            homeScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            
-            resetGame();
-        }
-
-        function goHome() {
-            state.running = false;
-            gameScreen.classList.add('hidden');
-            homeScreen.classList.remove('hidden');
-        }
-
-        function resetGame() {
-            // Calculate grid size based on responsive board size
-            const boardRect = boardEl.getBoundingClientRect();
-            // We use fixed 20x16 grid for simplicity, cell size adjusts via CSS
-            
-            state.snake = [{x: 10, y: 10}, {x: 10, y: 11}, {x: 10, y: 12}];
-            state.direction = {x: 0, y: -1}; // Start moving up
-            state.nextDirection = {x: 0, y: -1};
-            state.score = 0;
-            state.running = true;
-            state.paused = false;
-            scoreEl.innerText = state.score;
-            overlayEl.classList.add('hidden');
-
-            placeFood();
-            window.requestAnimationFrame(gameLoop);
-        }
-
-        function placeFood() {
-            let valid = false;
-            while (!valid) {
-                state.food = {
-                    x: Math.floor(Math.random() * config.gridX),
-                    y: Math.floor(Math.random() * config.gridY)
-                };
-                // Ensure food doesn't spawn on snake
-                valid = !state.snake.some(segment => segment.x === state.food.x && segment.y === state.food.y);
-            }
-        }
-
-        function gameLoop(currentTime) {
-            if (!state.running) return;
-
-            window.requestAnimationFrame(gameLoop);
-            
-            const secondsSinceLastRender = (currentTime - state.lastRender) / 1000;
-            if (secondsSinceLastRender < config.speed / 1000) return;
-            
-            state.lastRender = currentTime;
-            update();
-            draw();
-        }
-
-        function update() {
-            if (state.paused) return;
-
-            state.direction = state.nextDirection;
-
-            const head = { ...state.snake[0] };
-            head.x += state.direction.x;
-            head.y += state.direction.y;
-
-            // Wall Collision Check (Game Over)
-            if (head.x < 0 || head.x >= config.gridX || head.y < 0 || head.y >= config.gridY) {
-                gameOver();
-                return;
-            }
-
-            // Self Collision Check
-            if (state.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
-            }
-
-            state.snake.unshift(head); // Add new head
-
-            // Check Food
-            if (head.x === state.food.x && head.y === state.food.y) {
-                state.score += 10;
-                scoreEl.innerText = state.score;
-                playSound('eat');
-                placeFood();
-                // Don't pop tail (grow)
-            } else {
-                state.snake.pop(); // Remove tail
-            }
-        }
-
-        function draw() {
-            boardEl.innerHTML = '';
-            
-            // Draw Food
-            const foodDiv = document.createElement('div');
-            foodDiv.style.left = (state.food.x * (100/config.gridX)) + '%';
-            foodDiv.style.top = (state.food.y * (100/config.gridY)) + '%';
-            foodDiv.style.width = (100/config.gridX) + '%';
-            foodDiv.style.height = (100/config.gridY) + '%';
-            foodDiv.classList.add('cell', 'food');
-            boardEl.appendChild(foodDiv);
-
-            // Draw Snake
-            state.snake.forEach((segment, index) => {
-                const snakeDiv = document.createElement('div');
-                snakeDiv.style.left = (segment.x * (100/config.gridX)) + '%';
-                snakeDiv.style.top = (segment.y * (100/config.gridY)) + '%';
-                snakeDiv.style.width = (100/config.gridX) + '%';
-                snakeDiv.style.height = (100/config.gridY) + '%';
-                
-                snakeDiv.classList.add('cell', 'snake');
-                if (index === 0) {
-                    snakeDiv.classList.add('head', characters[state.characterIndex].colorClass);
-                }
-                boardEl.appendChild(snakeDiv);
+        // Simple touch effect for mobile
+        document.querySelectorAll('.char-btn, .dev-card').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.style.transform = 'translate(1px, 1px)';
+                this.style.boxShadow = '2px 2px 0 var(--border-color)';
             });
-        }
-
-        function gameOver() {
-            state.running = false;
-            playSound('die');
-            overlayMsg.innerText = "GAME OVER\n" + characters[state.characterIndex].name + " Failed!";
-            overlayEl.classList.remove('hidden');
-        }
-
-        // --- INPUT HANDLING ---
-        window.addEventListener('keydown', e => {
-            switch (e.key) {
-                case 'ArrowUp':
-                    if (state.direction.y === 0) state.nextDirection = { x: 0, y: -1 };
-                    break;
-                case 'ArrowDown':
-                    if (state.direction.y === 0) state.nextDirection = { x: 0, y: 1 };
-                    break;
-                case 'ArrowLeft':
-                    if (state.direction.x === 0) state.nextDirection = { x: -1, y: 0 };
-                    break;
-                case 'ArrowRight':
-                    if (state.direction.x === 0) state.nextDirection = { x: 1, y: 0 };
-                    break;
-            }
-        });
-
-        // Touch Support
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, {passive: false});
-
-        document.addEventListener('touchmove', e => {
-            if(!state.running) return;
-            e.preventDefault(); // Stop scrolling
-        }, {passive: false});
-
-        document.addEventListener('touchend', e => {
-            if(!state.running) return;
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
             
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-
-            if (Math.abs(dx) > Math.abs(dy)) {
-                // Horizontal
-                if (dx > 0 && state.direction.x === 0) state.nextDirection = { x: 1, y: 0 };
-                else if (dx < 0 && state.direction.x === 0) state.nextDirection = { x: -1, y: 0 };
-            } else {
-                // Vertical
-                if (dy > 0 && state.direction.y === 0) state.nextDirection = { x: 0, y: 1 };
-                else if (dy < 0 && state.direction.y === 0) state.nextDirection = { x: 0, y: -1 };
-            }
-        }, {passive: false});
-
+            el.addEventListener('touchend', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '3px 3px 0 var(--border-color)';
+            });
+        });
     </script>
 </body>
 </html>
