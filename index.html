@@ -98,7 +98,7 @@
             display: block;
         }
         .char-img .fallback {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             width: 100%;
@@ -159,7 +159,8 @@
         #nameModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            display: flex; align-items: center; justify-content: center;
+            display: none; /* Changed from hidden class to inline style */
+            align-items: center; justify-content: center;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
         }
@@ -192,13 +193,11 @@
         .modal-btn:hover {
             background: #3a503a;
         }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <!-- Name Modal (shown after character select) -->
-    <div id="nameModal" class="hidden">
+    <div id="nameModal">
         <div class="modal-content">
             <h3>ENTER RIZZ NAME</h3>
             <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 letters/numbers only</p>
@@ -259,9 +258,32 @@
 
         let selectedChar = null;
 
+        // Generate or retrieve player ID and name
+        function getPlayerData() {
+            let playerId = localStorage.getItem('rizz_player_id');
+            let playerName = localStorage.getItem('rizz_player_name');
+            
+            if (!playerId) {
+                // Generate unique anonymous ID
+                playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('rizz_player_id', playerId);
+            }
+            
+            return { id: playerId, name: playerName || null };
+        }
+
+        // Show name modal when character is selected
         function selectChar(charIdx) {
             selectedChar = charIdx;
-            document.getElementById('nameModal').classList.remove('hidden');
+            const player = getPlayerData();
+            
+            if (player.name) {
+                // Player already has a name, go directly to game
+                window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(player.name)}&id=${player.id}`;
+            } else {
+                // Show name modal
+                document.getElementById('nameModal').style.display = 'flex';
+            }
         }
 
         function confirmName() {
@@ -273,17 +295,20 @@
                 return;
             }
             
-            name = name.replace(/[^a-zA-Z0-9]/g, '');
+            // Allow only letters, numbers, and spaces
+            name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
             if (name.length < 3) {
                 alert('Use only letters and numbers');
                 return;
             }
             
-            // Save name in localStorage
-            localStorage.setItem('rizz_name', name);
+            const player = getPlayerData();
             
-            // Go to game with char + name
-            window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(name)}`;
+            // Save name to localStorage
+            localStorage.setItem('rizz_player_name', name);
+            
+            // Go to game with char + name + id
+            window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(name)}&id=${player.id}`;
         }
 
         async function loadLeaderboard() {
@@ -295,28 +320,33 @@
                 
                 const entries = document.getElementById('leaderboardEntries');
                 if (snapshot.empty) {
-                    entries.innerHTML = '<div class="lb-entry">No scores yet</div>';
+                    entries.innerHTML = '<div class="lb-entry">No scores yet. Be the first!</div>';
                     return;
                 }
 
-                entries.innerHTML = snapshot.docs.map((doc, idx) => {
+                let html = '';
+                snapshot.docs.forEach((doc, idx) => {
                     const data = doc.data();
                     const rankClass = idx < 3 ? `rank-${idx + 1}` : '';
-                    return `
+                    html += `
                         <div class="lb-entry">
                             <span class="lb-rank ${rankClass}">#${idx + 1}</span>
                             <span>${data.name || 'Anonymous'} (${data.score})</span>
                         </div>
                     `;
-                }).join('');
+                });
+                entries.innerHTML = html;
             } catch (e) {
                 console.error("Leaderboard error:", e);
                 document.getElementById('leaderboardEntries').innerHTML = 
-                    '<div class="lb-entry" style="color:#a83636;">LOAD FAILED</div>';
+                    `<div class="lb-entry" style="color:#a83636;">ERROR: ${e.message}</div>`;
             }
         }
 
-        window.addEventListener('load', loadLeaderboard);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+        });
     </script>
 </body>
 </html>
