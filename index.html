@@ -3,10 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Rizznake — Retro Snake with Rizz</title>
-    <meta name="description" content="Choose your rizz style, set your name, and climb the global leaderboard.">
+    <meta name="description" content="A modern retro twist on Snake. Choose your persona, chase glory, and dominate the leaderboard.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Radhin">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -34,360 +38,276 @@
             overflow-x: hidden;
         }
 
-        body::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,20,0,0.08) 0px, transparent 2px);
-            pointer-events: none;
-        }
-
-        .container { width: 100%; max-width: 520px; }
-
-        /* Name Modal */
-        #nameModal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(10, 20, 10, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: var(--panel);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 0 20px var(--glow);
-        }
-
-        .modal-content h2 {
-            font-size: 18px;
+        .user-display {
+            background: rgba(0,0,0,0.4);
+            padding: 8px 15px;
+            border-radius: 6px;
             margin-bottom: 20px;
-            color: #aaffaa;
-        }
-
-        .name-input {
-            width: 100%;
-            padding: 12px;
-            font-family: 'Press Start 2P', monospace;
             font-size: 14px;
-            background: rgba(0,0,0,0.3);
-            border: 2px solid var(--border);
-            color: var(--text);
-            text-align: center;
-            margin-bottom: 20px;
-            border-radius: 4px;
+            border: 1px solid var(--border);
         }
+        .user-display span { color: #aaffaa; }
 
-        .name-btn {
-            background: var(--panel);
-            color: var(--text);
-            border: 2px solid var(--border);
-            padding: 10px 20px;
-            font-family: inherit;
-            font-size: 14px;
-            cursor: pointer;
-            text-transform: uppercase;
-            border-radius: 4px;
-        }
-        .name-btn:hover { background: rgba(255,255,255,0.1); }
-
-        .header {
-            text-align: center;
-            margin: 20px 0 25px;
-        }
-
-        .logo {
-            font-size: 36px;
-            letter-spacing: -1px;
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(90deg, #fff, #aaffaa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 8px;
-        }
-
-        /* Player name tag (shown after name is set) */
-        #playerTag {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-bottom: 15px;
-            display: none;
-        }
-
+        /* Rest of your existing styles... */
+        .header { text-align: center; margin: 10px 0 25px; }
+        .logo { font-size: 36px; text-shadow: 0 0 8px var(--glow), 2px 2px 0 var(--border); margin-bottom: 8px; }
+        .subtitle { font-size: 12px; opacity: 0.7; max-width: 400px; line-height: 1.5; }
+        
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 22px;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
             margin-bottom: 25px;
         }
 
         .char-card {
             background: var(--panel);
             border: 2px solid var(--border);
-            border-radius: 10px;
-            padding: 18px 12px;
+            border-radius: 8px;
+            padding: 16px 10px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: transform 0.2s;
         }
-
-        .char-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.5), 0 0 12px var(--glow);
-        }
+        .char-card:hover { transform: translateY(-4px); }
 
         .char-img {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 12px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--border);
+            width: 80px; height: 80px; margin: 0 auto 10px;
+            border-radius: 50%; overflow: hidden; border: 2px solid var(--border);
         }
-
-        .char-img img, .char-img .fallback {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
+        .char-img img, .char-img.fallback {
+            width: 100%; height: 100%; object-fit: cover;
+            display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white;
         }
-
         .char-0 .fallback { background: var(--dash); }
         .char-1 .fallback { background: var(--vasu); }
         .char-2 .fallback { background: var(--sayip); }
 
-        .char-name {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
+        .char-name { font-size: 15px; font-weight: bold; margin: 6px 0; }
         .char-0 .char-name { color: var(--dash); }
         .char-1 .char-name { color: var(--vasu); }
         .char-2 .char-name { color: var(--sayip); }
 
         .leaderboard {
-            background: rgba(20, 35, 20, 0.7);
+            background: rgba(20, 35, 20, 0.6);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
+            padding: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin: 10px 0;
         }
-
-        .lb-title {
-            text-align: center;
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: #aaffaa;
-        }
-
-        .lb-entries {
-            display: grid;
-            gap: 10px;
-        }
-
-        .lb-entry {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            padding: 6px 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 4px;
-        }
-
-        .lb-rank { width: 24px; text-align: center; font-weight: bold; }
+        .lb-title { text-align: center; font-size: 14px; margin-bottom: 12px; color: #aaffaa; }
+        .lb-entry { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; }
+        .rank-1 { color: gold; }
+        .rank-2 { color: silver; }
+        .rank-3 { color: #cd7f32; }
 
         .watermark {
             position: absolute;
             bottom: 12px;
-            left: 5,0%;
+            left: 50%;
             transform: translateX(-50%);
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.5;
+        }
+
+        /* Name Modal */
+        #nameModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+        }
+        .modal-content {
+            background: var(--panel);
+            padding: 25px;
+            border: 2px solid var(--border);
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+        }
+        .modal-content input {
+            width: 100%; padding: 10px; margin: 15px 0;
+            background: #0f1a0f; border: 1px solid var(--border);
+            color: var(--text); font-family: inherit; font-size: 14px;
+        }
+        .modal-btn {
+            background: var(--border);
+            color: var(--text);
+            border: none;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Name Entry Modal (hidden by default) -->
-    <div id="nameModal">
+    <!-- Name Modal (shown once) -->
+    <div id="nameModal" class="hidden">
         <div class="modal-content">
-            <h2>SET YOUR RIZZ NAME</h2>
-            <input type="text" id="playerName" class="name-input" placeholder="e.g., SnakeMaster" maxlength="15">
-            <button class="name-btn" onclick="confirmName()">CONFIRM →</button>
-            <div style="font-size:8px; margin-top:15px; opacity:0.6;">
-                Name saved locally. No login needed.
-            </div>
+            <h3>ENTER RIZZ NAME</h3>
+            <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 characters. No special symbols.</p>
+            <input type="text" id="playerName" maxlength="12" placeholder="e.g., SnakeMaster">
+            <br>
+            <button class="modal-btn" onclick="saveName()">START GAME</button>
         </div>
     </div>
 
-    <!-- Main UI -->
-    <div class="container">
-        <div class="header">
-            <h1 class="logo">RIZZNAKE</h1>
-            <div id="playerTag">PLAYING AS: <span id="displayName">Guest</span></div>
-        </div>
-
-        <div class="grid">
-            <div class="char-card char-0" onclick="selectChar(0)">
-                <div class="char-img">
-                    <img src="dashamoolam.jpg" alt="Dashamoolam">
-                    <div class="fallback">DMIN</div>
-                </div>
-                <div class="char-name">DASHAMOOLAM</div>
-                <div class="char-desc">Chill</div>
-            </div>
-
-            <div class="char-card char-1" onclick="selectChar(1)">
-                <div class="char-img">
-                    <img src="vasu.jpg" alt="Vasu">
-                    <div class="fallback">V</div>
-                </div>
-                <div class="char-name">VASU</div>
-                <div class="char-desc">Aggressive</div>
-            </div>
-
-            <div class="char-card char-2" onclick="selectChar(2)">
-                <div class="char-img">
-                    <img src="sayip.jpg" alt="Sayip">
-                    <div class="fallback">S</div>
-                </div>
-                <div class="char-name">SAYIP</div>
-                <div class="char-desc">Chaos</div>
-            </div>
-        </div>
-
-        <div class="leaderboard">
-            <div class="lb-title">GLOBAL LEADERBOARD</div>
-            <div class="lb-entries" id="leaderboardEntries">
-                <div style="text-align:center; opacity:0.6;">Loading...</div>
-            </div>
-        </div>
-
-        <div class="watermark">Rizznake © Radhin</div>
+    <!-- User Display -->
+    <div class="user-display">
+        PLAYER: <span id="displayName">Loading...</span>
     </div>
+
+    <div class="header">
+        <h1 class="logo">RIZZNAKE</h1>
+        <p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot.</p>
+    </div>
+
+    <div class="grid">
+        <div class="char-card char-0" onclick="play(0)">
+            <div class="char-img">
+                <img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.style.display='none'">
+                <div class="fallback">D</div>
+            </div>
+            <div class="char-name">DASHAMOOLAM</div>
+        </div>
+        <div class="char-card char-1" onclick="play(1)">
+            <div class="char-img">
+                <img src="vasu.jpg" alt="Vasu" onerror="this.style.display='none'">
+                <div class="fallback">V</div>
+            </div>
+            <div class="char-name">VASU</div>
+        </div>
+        <div class="char-card char-2" onclick="play(2)">
+            <div class="char-img">
+                <img src="sayip.jpg" alt="Sayip" onerror="this.style.display='none'">
+                <div class="fallback">S</div>
+            </div>
+            <div class="char-name">SAYIP</div>
+        </div>
+    </div>
+
+    <div class="leaderboard">
+        <div class="lb-title">RIZZ LEADERBOARD</div>
+        <div class="lb-entries" id="leaderboardEntries">Loading...</div>
+    </div>
+
+    <div class="watermark">Rizznake © Radhin • 2024</div>
 
     <script>
-        // === CONFIG ===
-        const API_BASE = 'https://asmakal.xo.je/api/player.php';
-        let selectedChar = null;
+        // ================== FIREBASE CONFIG ==================
+        // 👇 REPLACE THIS WITH YOUR ACTUAL CONFIG FROM STEP 1 👇
+        const firebaseConfig = {
+          apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          authDomain: "your-project.firebaseapp.com",
+          projectId: "your-project",
+          storageBucket: "your-project.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:xxxxxxxxxxxxxxx"
+        };
+        // 👆 REPLACE THIS WITH YOUR ACTUAL CONFIG 👆
 
-        // === INIT ===
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if player already has a name
-            const savedName = localStorage.getItem('rizznake_display_name');
-            if (savedName) {
-                document.getElementById('displayName').textContent = savedName;
-                document.getElementById('playerTag').style.display = 'block';
-            }
-            loadLeaderboard();
-        });
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        // === CHARACTER SELECTION ===
-        function selectChar(charIdx) {
-            selectedChar = charIdx;
+        // ================== USER IDENTITY ==================
+        function getOrCreateUser() {
+            let uid = localStorage.getItem('rizz_uid');
+            let name = localStorage.getItem('rizz_name');
             
-            const savedName = localStorage.getItem('rizznake_display_name');
-            if (savedName) {
-                // Name already set → go to game
-                startGame();
-            } else {
-                // Show name modal
-                document.getElementById('nameModal').style.display = 'flex';
-                document.getElementById('playerName').focus();
+            if (!uid) {
+                // Generate anonymous UID (random 16-char hex)
+                uid = Math.random().toString(36).substring(2, 15) + 
+                      Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('rizz_uid', uid);
             }
+            
+            if (!name) {
+                document.getElementById('nameModal').classList.remove('hidden');
+                return null;
+            }
+            
+            return { uid, name };
         }
 
-        // === NAME SUBMISSION ===
-        function confirmName() {
+        function saveName() {
             const input = document.getElementById('playerName');
             let name = input.value.trim();
-
-            if (!name || name.length < 2 || name.length > 15) {
-                alert('Name must be 2-15 characters.');
+            
+            if (name.length < 3 || name.length > 12) {
+                alert('Name must be 3-12 characters');
                 return;
             }
-
-            // Generate UUID (anonymous ID)
-            const userId = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-            );
-
-            // Save locally
-            localStorage.setItem('rizznake_user_id', userId);
-            localStorage.setItem('rizznake_display_name', name);
-
-            // Register with server
-            registerPlayer(userId, name);
-        }
-
-        async function registerPlayer(userId, name) {
-            try {
-                const res = await fetch(`${API_BASE}?action=init`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, display_name: name })
-                });
-
-                if (res.ok) {
-                    document.getElementById('displayName').textContent = name;
-                    document.getElementById('playerTag').style.display = 'block';
-                    document.getElementById('nameModal').style.display = 'none';
-                    startGame();
-                } else {
-                    const err = await res.json();
-                    alert('Error: ' + (err.error || 'Failed to save name'));
-                }
-            } catch (e) {
-                alert('Network error. Check connection.');
+            
+            // Remove special characters (keep letters, numbers, spaces)
+            name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+            if (name.length < 3) {
+                alert('Name must contain letters/numbers');
+                return;
             }
+            
+            localStorage.setItem('rizz_name', name);
+            document.getElementById('displayName').textContent = name;
+            document.getElementById('nameModal').classList.add('hidden');
+            loadLeaderboard();
         }
 
-        function startGame() {
-            const userId = localStorage.getItem('rizznake_user_id');
-            window.location.href = `game.html?char=${selectedChar}&user_id=${encodeURIComponent(userId)}`;
-        }
-
-        // === LEADERBOARD ===
+        // ================== LEADERBOARD ==================
         async function loadLeaderboard() {
             try {
-                const res = await fetch(`${API_BASE}?action=leaderboard`);
-                const scores = await res.json();
-
-                const container = document.getElementById('leaderboardEntries');
-                if (!scores.length) {
-                    container.innerHTML = '<div style="text-align:center; opacity:0.6;">No scores yet</div>';
+                const snapshot = await db.collection('scores')
+                    .orderBy('score', 'desc')
+                    .limit(10)
+                    .get();
+                
+                const entries = document.getElementById('leaderboardEntries');
+                if (snapshot.empty) {
+                    entries.innerHTML = '<div class="lb-entry">No scores yet</div>';
                     return;
                 }
 
-                container.innerHTML = scores.map((entry, idx) => `
-                    <div class="lb-entry">
-                        <span class="lb-rank">#${idx + 1}</span>
-                        <span>${entry.name} (${entry.score})</span>
-                    </div>
-                `).join('');
+                entries.innerHTML = snapshot.docs.map((doc, idx) => {
+                    const data = doc.data();
+                    const rankClass = idx < 3 ? `rank-${idx + 1}` : '';
+                    return `
+                        <div class="lb-entry">
+                            <span class="lb-rank ${rankClass}">#${idx + 1}</span>
+                            <span>${data.name || 'Anonymous'} (${data.score})</span>
+                        </div>
+                    `;
+                }).join('');
             } catch (e) {
+                console.error("Leaderboard error:", e);
                 document.getElementById('leaderboardEntries').innerHTML = 
-                    '<div style="text-align:center; opacity:0.6;">Offline</div>';
+                    '<div class="lb-entry" style="color:#a83636;">LOAD FAILED</div>';
             }
         }
 
-        // Refresh every 15 sec
-        setInterval(loadLeaderboard, 15000);
+        // ================== GAME START ==================
+        function play(charIdx) {
+            const user = getOrCreateUser();
+            if (!user) {
+                alert('Please enter a name first!');
+                return;
+            }
+            window.location.href = `game.html?char=${charIdx}&name=${encodeURIComponent(user.name)}`;
+        }
+
+        // ================== INIT ==================
+        window.addEventListener('load', () => {
+            const user = getOrCreateUser();
+            if (user) {
+                document.getElementById('displayName').textContent = user.name;
+                loadLeaderboard();
+            }
+        });
     </script>
 </body>
 </html>
