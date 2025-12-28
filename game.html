@@ -388,10 +388,11 @@ async function saveScore() {
 
 async function submitScore() {
   try {
-    // Only check scores for this player & character
+    console.log("Submitting global score for:", gameState.playerName, "score:", gameState.score);
+
+    // Check if the player already has a score (global, no character)
     const existingScores = await db.collection('scores')
       .where('playerId', '==', gameState.playerId)
-      .where('character', '==', gameState.charIdx)
       .get();
 
     if (!existingScores.empty) {
@@ -406,29 +407,39 @@ async function submitScore() {
         }
       });
 
-      // Update only if new score is higher
+      // Update the score only if new score is higher
       if (gameState.score > highestScore && highestDoc) {
         await highestDoc.ref.update({
           score: gameState.score,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        console.log("Score updated for character!");
+        console.log("Global score updated for player:", gameState.playerName);
+      } else if (!highestDoc) {
+        // Somehow there is no doc, create one
+        await db.collection('scores').add({
+          name: gameState.playerName,
+          playerId: gameState.playerId,
+          score: gameState.score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Global score created for player:", gameState.playerName);
+      } else {
+        console.log("Existing global score is higher or equal; no update needed.");
       }
+
     } else {
-      // No score for this character yet, create new
+      // No previous score for this player, create new
       await db.collection('scores').add({
         name: gameState.playerName,
         playerId: gameState.playerId,
         score: gameState.score,
-        character: gameState.charIdx,
-        characterName: characters[gameState.charIdx].name,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log("Score submitted for new character!");
+      console.log("Global score submitted for player:", gameState.playerName);
     }
 
   } catch (e) {
-    console.error("Score submit failed:", e);
+    console.error("Score submission failed:", e);
   }
 }
 
