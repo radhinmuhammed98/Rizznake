@@ -297,22 +297,44 @@
         let audioCtx = null;
 
         // Init
+// Init
         function init() {
             const urlParams = new URLSearchParams(window.location.search);
+
+            // 🔐 Persistent Player ID
+            let pid = localStorage.getItem('rizznake_player_id');
+
+            // If URL provides ID, override & sync
+            const urlId = urlParams.get('id');
+            if (urlId) {
+                pid = urlId;
+                localStorage.setItem('rizznake_player_id', urlId);
+            }
+
+            // If still no ID, generate one
+            if (!pid) {
+                pid = 'player_' + crypto.randomUUID();
+                localStorage.setItem('rizznake_player_id', pid);
+            }
+
+            gameState.playerId = pid;
+
+            // Other params
             gameState.charIdx = parseInt(urlParams.get('char')) || 0;
             gameState.playerName = urlParams.get('name') || 'Anonymous';
-            gameState.playerId = urlParams.get('id') || 'anonymous_' + Date.now();
-            
-            document.getElementById('playerNameDisplay').textContent = gameState.playerName;
-            
+
+            document.getElementById('playerNameDisplay').textContent =
+                gameState.playerName;
+
             gameState.boardEl = document.getElementById('board');
             setupBoardDOM();
             bindEvents();
             loadScores();
             loadMuteState();
             resetGame();
-        }
+        }    
 
+        
         function setupBoardDOM() {
             gameState.cellElements = [];
             const board = gameState.boardEl;
