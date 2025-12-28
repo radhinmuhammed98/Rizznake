@@ -76,6 +76,9 @@
             font-size: 14px;
             font-weight: bold;
             color: #aaffaa;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .logout-btn {
             background: none;
@@ -159,7 +162,7 @@
             gap: 20px;
             width: 100%;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0 auto 30px;
         }
 
         .char-card {
@@ -210,6 +213,11 @@
             font-size: 15px;
             font-weight: bold;
             margin: 6px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 130px;
+            margin: 0 auto 6px;
         }
         .char-0 .char-name { color: var(--dash); }
         .char-1 .char-name { color: var(--vasu); }
@@ -246,6 +254,19 @@
         .rank-1 { color: gold; }
         .rank-2 { color: silver; }
         .rank-3 { color: #cd7f32; }
+        
+        .lb-loading {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .lb-error {
+            color: var(--vasu);
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
 
         /* About/Help content styling */
         .info-section {
@@ -348,6 +369,23 @@
         }
 
         .hidden { display: none !important; }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -369,7 +407,7 @@
     <div id="changeNameModal">
         <div class="modal-content">
             <h3>CHANGE YOUR NAME</h3>
-            <p style="font-size:10px;opacity:0.7;margin:10px 0;">Your current ID will be preserved</p>
+            <p style="font-size:10px;opacity:0.7;margin:10px 0;">Your stats will be preserved</p>
             <input type="text" id="newPlayerName" maxlength="12" placeholder="New name">
             <div class="name-error" id="changeNameError"></div>
             <div class="modal-btns">
@@ -396,7 +434,6 @@
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <div class="nav-tab active" data-tab="play">PLAY</div>
-        <div class="nav-tab" data-tab="leaderboard">LEADERBOARD</div>
         <div class="nav-tab" data-tab="about">ABOUT</div>
         <div class="nav-tab" data-tab="help">HELP</div>
     </div>
@@ -430,12 +467,13 @@
                     <div class="char-desc">Chaos • Unpredictable • Wild</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="tab-pane" id="leaderboard-tab">
+            
+            <!-- Leaderboard moved to main tab -->
             <div class="leaderboard">
                 <div class="lb-title">GLOBAL RIZZ RANKINGS</div>
-                <div class="lb-entries" id="leaderboardEntries">Loading...</div>
+                <div class="lb-entries" id="leaderboardEntries">
+                    <div class="lb-loading">Loading leaderboard...</div>
+                </div>
             </div>
         </div>
         
@@ -444,7 +482,10 @@
                 <h3>ABOUT RIZZNAKE</h3>
                 <p>Rizznake is a modern retro twist on the classic Snake game, featuring unique character personalities and a global leaderboard.</p>
                 <p>Created with love by Radhin, this game combines nostalgic 90s aesthetics with modern web technologies.</p>
-                <p>Version 1.2 • © 2024 Radhin Inc.</p>
+                <p>Version 1.3 • © 2024 Radhin Inc.</p>
+                
+                <h3 style="margin-top: 15px;">PRIVACY POLICY</h3>
+                <p>We only store your chosen username and game scores. No personal information is collected. All data is used solely for the leaderboard functionality.</p>
             </div>
         </div>
         
@@ -459,12 +500,21 @@
                     <li><strong>Characters:</strong> Each has unique sound effects and visual style</li>
                 </ul>
                 <p>Pro tip: Longer snakes are harder to control. Plan your moves ahead!</p>
+                
+                <h3 style="margin-top: 15px;">SUPPORT</h3>
+                <p>Having issues? Contact us at support@rizznake.game with details of the problem.</p>
             </div>
         </div>
     </div>
+    
+    <div class="footer-links">
+        <a href="#" onclick="showTab('about')">Privacy Policy</a>
+        <a href="#" onclick="showTab('help')">Help & Support</a>
+        <a href="https://www.instagram.com/radhin.inc/" target="_blank">Developer</a>
+    </div>
 
     <div class="watermark">Rizznake © Radhin • 2024</div>
-    <div class="version">v1.2.0</div>
+    <div class="version">v1.3.0</div>
 
     <script>
         // Firebase Config
@@ -481,24 +531,28 @@
 
         let selectedChar = null;
         let currentUser = null;
+        let leaderboardLoaded = false;
 
         // Navigation tabs
+        function showTab(tabId) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Show corresponding content
+            document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+            
+            // Load leaderboard if needed
+            if (tabId === 'play' && !leaderboardLoaded) {
+                loadLeaderboard();
+            }
+        }
+        
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const tabId = tab.getAttribute('data-tab');
-                
-                // Update active tab
-                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Show corresponding content
-                document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-                
-                // Load leaderboard when tab is shown
-                if (tabId === 'leaderboard' && !document.getElementById('leaderboardEntries').hasChildNodes()) {
-                    loadLeaderboard();
-                }
+                showTab(tabId);
             });
         });
 
@@ -522,6 +576,9 @@
             } else {
                 document.getElementById('nameModal').style.display = 'flex';
             }
+            
+            // Always load leaderboard on init
+            loadLeaderboard();
         }
 
         // Check if username exists in database
@@ -589,11 +646,16 @@
         }
 
         function changeNamePrompt() {
+            if (!currentUser.name) {
+                document.getElementById('nameModal').style.display = 'flex';
+                return;
+            }
+            
             document.getElementById('changeNameModal').style.display = 'flex';
             document.getElementById('newPlayerName').value = currentUser.name || '';
         }
 
-        function changeName() {
+        async function changeName() {
             const input = document.getElementById('newPlayerName');
             let name = input.value.trim();
             const errorEl = document.getElementById('changeNameError');
@@ -613,25 +675,40 @@
             }
             
             // Check if name is unique
-            isUsernameTaken(name).then(isTaken => {
+            isUsernameTaken(name).then(async (isTaken) => {
                 if (isTaken) {
                     errorEl.textContent = 'Name already taken! Try another.';
                     return;
                 }
                 
-                // Save name to localStorage
-                localStorage.setItem('rizz_player_name', name);
-                currentUser.name = name;
-                
-                document.getElementById('displayName').textContent = name;
-                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-                
-                // Close modal
-                document.getElementById('changeNameModal').style.display = 'none';
-                
-                // Reload leaderboard to reflect new name
-                if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+                try {
+                    // Update the name in all scores with this player ID
+                    const userScores = await db.collection('scores')
+                        .where('playerId', '==', currentUser.id)
+                        .get();
+                    
+                    const batch = db.batch();
+                    userScores.docs.forEach(doc => {
+                        batch.update(doc.ref, { name: name });
+                    });
+                    
+                    await batch.commit();
+                    
+                    // Save name to localStorage
+                    localStorage.setItem('rizz_player_name', name);
+                    currentUser.name = name;
+                    
+                    document.getElementById('displayName').textContent = name;
+                    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                    
+                    // Close modal
+                    document.getElementById('changeNameModal').style.display = 'none';
+                    
+                    // Reload leaderboard
                     loadLeaderboard();
+                } catch (e) {
+                    console.error("Error updating name:", e);
+                    errorEl.textContent = 'Failed to update name. Try again.';
                 }
             });
         }
@@ -646,13 +723,17 @@
         }
 
         async function loadLeaderboard() {
+            if (leaderboardLoaded) return;
+            
             try {
                 const snapshot = await db.collection('scores')
                     .orderBy('score', 'desc')
                     .limit(10)
                     .get();
                 
+                leaderboardLoaded = true;
                 const entries = document.getElementById('leaderboardEntries');
+                
                 if (snapshot.empty) {
                     entries.innerHTML = '<div class="lb-entry">Be the first to climb the ranks!</div>';
                     return;
@@ -673,18 +754,12 @@
             } catch (e) {
                 console.error("Leaderboard error:", e);
                 document.getElementById('leaderboardEntries').innerHTML = 
-                    `<div class="lb-entry" style="color:#a83636;">ERROR: ${e.message}</div>`;
+                    `<div class="lb-error">Failed to load leaderboard. Please refresh.</div>`;
             }
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initUser();
-            // Load leaderboard if visible
-            if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
-                loadLeaderboard();
-            }
-        });
+        document.addEventListener('DOMContentLoaded', initUser);
     </script>
 </body>
 </html>
