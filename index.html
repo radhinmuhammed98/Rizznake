@@ -621,11 +621,11 @@
             
             if (!playerId) {
                 // Generate unique anonymous ID
-                playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                playerId = 'player_' + crypto.randomUUID();
                 localStorage.setItem('rizz_player_id', playerId);
             }
             
-            currentUser = { id: playerId, name: playerName || null };
+            currentUser = { playerId: playerId, name: playerName || null };
             
             if (playerName) {
                 document.getElementById('displayName').textContent = playerName;
