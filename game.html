@@ -367,76 +367,96 @@ function playDie() {
   playSound(char.dieSound);
 }
 
-// Unified Scores (no per-character separation)
+// Unified Scores (global best for HUD)
 function loadScores() {
-// Load global best score (across all characters)
-const savedBest = localStorage.getItem('rizznake_best_global');
-gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
-document.getElementById('bestVal').textContent = gameState.bestScore;
+  const savedBest = localStorage.getItem('rizznake_best_global');
+  gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
+  document.getElementById('bestVal').textContent = gameState.bestScore;
 }
 
 async function saveScore() {
-if (gameState.score <= gameState.bestScore) {
-// Still submit to database to track progress
-await submitScore();
-return;
-}
+  // Update local/global best
+  if (gameState.score > gameState.bestScore) {
+    gameState.bestScore = gameState.score;
+    localStorage.setItem('rizznake_best_global', gameState.bestScore);
+    document.getElementById('bestVal').textContent = gameState.bestScore;
+  }
 
-// Update local best score (global, not per character)
-gameState.bestScore = gameState.score;
-localStorage.setItem('rizznake_best_global', gameState.bestScore);
-document.getElementById('bestVal').textContent = gameState.bestScore;
-
-// Submit to database
-await submitScore();
+  // Submit to database per character
+  await submitScore();
 }
 
 async function submitScore() {
-try {
-// Check if player already has a score in the database
-const existingScores = await db.collection('scores')
-.where('playerId', '==', gameState.playerId)
-.get();
+  try {
+    // Only check scores for this player & character
+    const existingScores = await db.collection('scores')
+      .where('playerId', '==', gameState.playerId)
+      .where('character', '==', gameState.charIdx)
+      .get();
 
-let needsUpdate = false;
-let highestScoreDoc = null;
-let highestScore = 0;
+    if (!existingScores.empty) {
+      let highestScore = 0;
+      let highestDoc = null;
 
-// Find the highest score document for this player
-existingScores.docs.forEach(doc => {
-const data = doc.data();
-if (data.score > highestScore) {
-highestScore = data.score;
-highestScoreDoc = doc;
-}
-});
+      existingScores.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.score > highestScore) {
+          highestScore = data.score;
+          highestDoc = doc;
+        }
+      });
 
-// If they have no scores yet, or this score is higher than their best
-if (existingScores.empty || gameState.score > highestScore) {
-// If they already have scores but this is higher, delete the old ones
-if (!existingScores.empty && highestScoreDoc) {
-const batch = db.batch();
-existingScores.docs.forEach(doc => {
-batch.delete(doc.ref);
-});
-await batch.commit();
+      // Update only if new score is higher
+      if (gameState.score > highestScore && highestDoc) {
+        await highestDoc.ref.update({
+          score: gameState.score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Score updated for character!");
+      }
+    } else {
+      // No score for this character yet, create new
+      await db.collection('scores').add({
+        name: gameState.playerName,
+        playerId: gameState.playerId,
+        score: gameState.score,
+        character: gameState.charIdx,
+        characterName: characters[gameState.charIdx].name,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log("Score submitted for new character!");
+    }
+
+  } catch (e) {
+    console.error("Score submit failed:", e);
+  }
 }
 
-// Create new score document
-await db.collection('scores').add({
-name: gameState.playerName,
-playerId: gameState.playerId,
-score: gameState.score,
-character: gameState.charIdx,
-characterName: characters[gameState.charIdx].name,
-timestamp: firebase.firestore.FieldValue.serverTimestamp()
-});
-console.log("Score submitted successfully!");
+// Example: fetching global leaderboard without duplicate names
+async function getGlobalLeaderboard(limit = 10) {
+  try {
+    const snapshot = await db.collection('scores')
+      .orderBy('score', 'desc')
+      .limit(100) // fetch more to filter duplicates
+      .get();
+
+    const uniquePlayers = new Map();
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (!uniquePlayers.has(data.name)) {
+        uniquePlayers.set(data.name, data);
+      }
+    });
+
+    // Convert to array & limit
+    return Array.from(uniquePlayers.values()).slice(0, limit);
+
+  } catch (e) {
+    console.error("Fetching leaderboard failed:", e);
+    return [];
+  }
 }
-} catch (e) {
-console.error("Score submit failed:", e);
-}
-}
+
 
 // Game Logic
 function resetGame() {
