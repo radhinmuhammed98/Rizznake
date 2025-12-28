@@ -346,11 +346,60 @@ gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
 document.getElementById('bestVal').textContent = gameState.bestScore;
 }
 
+// Unified score saving (global best, one entry per player)
 async function saveScore() {
-if (gameState.score <= gameState.bestScore) {
-// Still submit to database to track progress
-await submitScore();
-return;
+    // Only submit if it's a new personal best
+    if (gameState.score <= gameState.bestScore) {
+        return;
+    }
+
+    // Update local best (global across all characters)
+    gameState.bestScore = gameState.score;
+    localStorage.setItem('rizznake_best_global', gameState.bestScore);
+    document.getElementById('bestVal').textContent = gameState.bestScore;
+
+    try {
+        // 1. Check if player already has a score doc
+        const existingSnapshot = await db.collection('scores')
+            .where('playerId', '==', gameState.playerId)
+            .limit(1)
+            .get();
+
+        if (!existingSnapshot.empty) {
+            // 2. If exists, get the doc and compare scores
+            const existingDoc = existingSnapshot.docs[0];
+            const existingData = existingDoc.data();
+
+            if (gameState.score > existingData.score) {
+                // Only update if new score is higher
+                await existingDoc.ref.update({
+                    score: gameState.score,
+                    character: gameState.charIdx,
+                    characterName: characters[gameState.charIdx].name,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("Score updated!");
+            }
+        } else {
+            // 3. If no existing score, create new one
+            await db.collection('scores').add({
+                name: gameState.playerName,
+                playerId: gameState.playerId,
+                score: gameState.score,
+                character: gameState.charIdx,
+                characterName: characters[gameState.charIdx].name,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("New score submitted!");
+        }
+
+        // 4. ✅ TRIGGER LEADERBOARD REFRESH in index1.html on next visit
+        // (We'll auto-reload when returning to home)
+
+    } catch (e) {
+        console.error("Score save failed:", e);
+        alert("Score saved locally. Leaderboard may not update.");
+    }
 }
 
 // Update local best score (global, not per character)
