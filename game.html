@@ -363,50 +363,41 @@ await submitScore();
 }
 
 async function submitScore() {
-try {
-// Check if player already has a score in the database
-const existingScores = await db.collection('scores')
-.where('playerId', '==', gameState.playerId)
-.get();
+  // Only submit if it's a new personal best
+  if (gameState.score <= gameState.bestScore) {
+    return;
+  }
 
-let needsUpdate = false;
-let highestScoreDoc = null;
-let highestScore = 0;
+  try {
+    const scoreData = {
+      name: gameState.playerName,
+      playerId: gameState.playerId,
+      score: gameState.score,
+      character: gameState.charIdx,
+      characterName: characters[gameState.charIdx].name,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
 
-// Find the highest score document for this player
-existingScores.docs.forEach(doc => {
-const data = doc.data();
-if (data.score > highestScore) {
-highestScore = data.score;
-highestScoreDoc = doc;
-}
-});
+    // Check if player already has a score document
+    const snapshot = await db.collection('scores')
+      .where('playerId', '==', gameState.playerId)
+      .limit(1)
+      .get();
 
-// If they have no scores yet, or this score is higher than their best
-if (existingScores.empty || gameState.score > highestScore) {
-// If they already have scores but this is higher, delete the old ones
-if (!existingScores.empty && highestScoreDoc) {
-const batch = db.batch();
-existingScores.docs.forEach(doc => {
-batch.delete(doc.ref);
-});
-await batch.commit();
-}
+    if (!snapshot.empty) {
+      // ✅ UPDATE existing document (same Firestore ID, no duplicates)
+      await snapshot.docs[0].ref.update(scoreData);
+    } else {
+      // ✅ CREATE new document (first time player)
+      await db.collection('scores').add(scoreData);
+    }
 
-// Create new score document
-await db.collection('scores').add({
-name: gameState.playerName,
-playerId: gameState.playerId,
-score: gameState.score,
-character: gameState.charIdx,
-characterName: characters[gameState.charIdx].name,
-timestamp: firebase.firestore.FieldValue.serverTimestamp()
-});
-console.log("Score submitted successfully!");
-}
-} catch (e) {
-console.error("Score submit failed:", e);
-}
+    console.log("Score saved successfully!");
+  } catch (e) {
+    console.error("Score submit failed:", e);
+    // Optional: show user-friendly message
+    // alert("Score saved locally. Leaderboard may update later.");
+  }
 }
 
 // Game Logic
