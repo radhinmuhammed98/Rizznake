@@ -96,7 +96,7 @@
 
         .header {
             text-align: center;
-            margin: 10px 0 20px;
+            margin: 10px 0 15px;
             width: 100%;
         }
         .logo {
@@ -113,6 +113,43 @@
             max-width: 400px;
             line-height: 1.5;
         }
+
+        /* Top 3 Leaderboard Section */
+        .top-leaderboard {
+            background: rgba(10, 20, 10, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .top-lb-title {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #aaffaa;
+            text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
+        }
+        .top-lb-entry {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        .top-lb-entry:last-child {
+            border-bottom: none;
+        }
+        .top-rank {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .top-rank-1 { color: gold; }
+        .top-rank-2 { color: silver; }
+        .top-rank-3 { color: #cd7f32; }
 
         /* Navigation Tabs - Retro Style */
         .nav-tabs {
@@ -229,7 +266,7 @@
             margin-top: 3px;
         }
 
-        .leaderboard {
+        .full-leaderboard {
             background: rgba(10, 20, 10, 0.7);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -238,35 +275,27 @@
             max-width: 500px;
             margin: 0 auto;
         }
-        .lb-title {
+        .full-lb-title {
             text-align: center;
             font-size: 14px;
             margin-bottom: 12px;
             color: #aaffaa;
             text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
         }
-        .lb-entry {
+        .full-lb-entry {
             display: flex;
             justify-content: space-between;
             font-size: 12px;
             padding: 5px 0;
         }
-        .rank-1 { color: gold; }
-        .rank-2 { color: silver; }
-        .rank-3 { color: #cd7f32; }
-        
-        .lb-loading {
+        .full-rank {
+            width: 30px;
             text-align: center;
-            padding: 15px;
-            font-size: 12px;
-            opacity: 0.7;
+            font-weight: bold;
         }
-        .lb-error {
-            color: var(--vasu);
-            text-align: center;
-            padding: 10px;
-            font-size: 12px;
-        }
+        .full-rank-1 { color: gold; }
+        .full-rank-2 { color: silver; }
+        .full-rank-3 { color: #cd7f32; }
 
         /* About/Help content styling */
         .info-section {
@@ -368,6 +397,20 @@
             min-height: 16px;
         }
 
+        /* Loading & Error states */
+        .lb-loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .lb-error {
+            color: var(--vasu);
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+        }
+
         .hidden { display: none !important; }
         .footer-links {
             display: flex;
@@ -385,6 +428,14 @@
         .footer-links a:hover {
             opacity: 1;
             text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .user-panel { flex-direction: column; gap: 10px; }
+            .nav-tabs { flex-wrap: wrap; }
+            .nav-tab { flex-basis: 33.33%; margin-bottom: 2px; }
+            .top-leaderboard, .grid { max-width: 100%; }
         }
     </style>
 </head>
@@ -431,9 +482,16 @@
         <p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot on the global leaderboard.</p>
     </div>
     
+    <!-- Top 3 Leaderboard -->
+    <div class="top-leaderboard">
+        <div class="top-lb-title">TOP RIZZ PLAYERS</div>
+        <div id="topLeaderboardEntries" class="lb-loading">Loading top players...</div>
+    </div>
+    
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <div class="nav-tab active" data-tab="play">PLAY</div>
+        <div class="nav-tab" data-tab="leaderboard">LEADERBOARD</div>
         <div class="nav-tab" data-tab="about">ABOUT</div>
         <div class="nav-tab" data-tab="help">HELP</div>
     </div>
@@ -467,13 +525,12 @@
                     <div class="char-desc">Chaos • Unpredictable • Wild</div>
                 </div>
             </div>
-            
-            <!-- Leaderboard moved to main tab -->
-            <div class="leaderboard">
-                <div class="lb-title">GLOBAL RIZZ RANKINGS</div>
-                <div class="lb-entries" id="leaderboardEntries">
-                    <div class="lb-loading">Loading leaderboard...</div>
-                </div>
+        </div>
+        
+        <div class="tab-pane" id="leaderboard-tab">
+            <div class="full-leaderboard">
+                <div class="full-lb-title">GLOBAL RIZZ RANKINGS</div>
+                <div id="fullLeaderboardEntries" class="lb-loading">Loading full leaderboard...</div>
             </div>
         </div>
         
@@ -482,7 +539,7 @@
                 <h3>ABOUT RIZZNAKE</h3>
                 <p>Rizznake is a modern retro twist on the classic Snake game, featuring unique character personalities and a global leaderboard.</p>
                 <p>Created with love by Radhin, this game combines nostalgic 90s aesthetics with modern web technologies.</p>
-                <p>Version 1.3 • © 2024 Radhin Inc.</p>
+                <p>Version 1.4 • © 2024 Radhin Inc.</p>
                 
                 <h3 style="margin-top: 15px;">PRIVACY POLICY</h3>
                 <p>We only store your chosen username and game scores. No personal information is collected. All data is used solely for the leaderboard functionality.</p>
@@ -514,7 +571,7 @@
     </div>
 
     <div class="watermark">Rizznake © Radhin • 2024</div>
-    <div class="version">v1.3.0</div>
+    <div class="version">v1.4.0</div>
 
     <script>
         // Firebase Config
@@ -532,6 +589,7 @@
         let selectedChar = null;
         let currentUser = null;
         let leaderboardLoaded = false;
+        let topLeaderboardLoaded = false;
 
         // Navigation tabs
         function showTab(tabId) {
@@ -543,9 +601,9 @@
             document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
             document.getElementById(`${tabId}-tab`).classList.add('active');
             
-            // Load leaderboard if needed
-            if (tabId === 'play' && !leaderboardLoaded) {
-                loadLeaderboard();
+            // Load full leaderboard if needed
+            if (tabId === 'leaderboard' && !leaderboardLoaded) {
+                loadFullLeaderboard();
             }
         }
         
@@ -557,33 +615,30 @@
         });
 
         // Generate or retrieve player ID and name
-    // MODIFIED initUser function - no longer shows modal on load
-    function initUser() {
-        let playerId = localStorage.getItem('rizz_player_id');
-        let playerName = localStorage.getItem('rizz_player_name');
-        
-        if (!playerId) {
-            playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-            localStorage.setItem('rizz_player_id', playerId);
+        function initUser() {
+            let playerId = localStorage.getItem('rizz_player_id');
+            let playerName = localStorage.getItem('rizz_player_name');
+            
+            if (!playerId) {
+                // Generate unique anonymous ID
+                playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('rizz_player_id', playerId);
+            }
+            
+            currentUser = { id: playerId, name: playerName || null };
+            
+            if (playerName) {
+                document.getElementById('displayName').textContent = playerName;
+                // Set avatar initial
+                document.getElementById('userAvatar').textContent = playerName.charAt(0).toUpperCase();
+            } else {
+                document.getElementById('nameModal').style.display = 'flex';
+            }
+            
+            // Load top leaderboard on init
+            loadTopLeaderboard();
         }
-        
-        currentUser = { id: playerId, name: playerName || null };
-        
-        // Update user display - show GUEST if no name
-        const displayNameEl = document.getElementById('displayName');
-        const userAvatarEl = document.getElementById('userAvatar');
-        
-        if (playerName) {
-            displayNameEl.textContent = playerName;
-            userAvatarEl.textContent = playerName.charAt(0).toUpperCase();
-        } else {
-            displayNameEl.textContent = 'GUEST';
-            userAvatarEl.textContent = '?';
-        }
-        
-        // Load leaderboard immediately (works for all tabs)
-        loadLeaderboard();
-    }
+
         // Check if username exists in database
         async function isUsernameTaken(username) {
             try {
@@ -599,14 +654,11 @@
         }
 
         // Show name modal when character is selected
-    // MODIFIED selectChar function - only shows name modal when needed
         function selectChar(charIdx) {
             selectedChar = charIdx;
-        
-            // Only show name modal if no name exists
+            
             if (!currentUser.name) {
                 document.getElementById('nameModal').style.display = 'flex';
-                document.getElementById('playerName').focus();
             } else {
                 startGame();
             }
@@ -693,6 +745,20 @@
                         .where('playerId', '==', currentUser.id)
                         .get();
                     
+                    if (userScores.empty) {
+                        // No scores to update, just change name
+                        localStorage.setItem('rizz_player_name', name);
+                        currentUser.name = name;
+                        document.getElementById('displayName').textContent = name;
+                        document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                        document.getElementById('changeNameModal').style.display = 'none';
+                        loadTopLeaderboard(); // Refresh top leaderboard
+                        if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+                            loadFullLeaderboard();
+                        }
+                        return;
+                    }
+                    
                     const batch = db.batch();
                     userScores.docs.forEach(doc => {
                         batch.update(doc.ref, { name: name });
@@ -710,8 +776,11 @@
                     // Close modal
                     document.getElementById('changeNameModal').style.display = 'none';
                     
-                    // Reload leaderboard
-                    loadLeaderboard();
+                    // Reload leaderboards
+                    loadTopLeaderboard();
+                    if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+                        loadFullLeaderboard();
+                    }
                 } catch (e) {
                     console.error("Error updating name:", e);
                     errorEl.textContent = 'Failed to update name. Try again.';
@@ -728,17 +797,17 @@
             window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.id}`;
         }
 
-        async function loadLeaderboard() {
-            if (leaderboardLoaded) return;
+        async function loadTopLeaderboard() {
+            if (topLeaderboardLoaded) return;
             
             try {
                 const snapshot = await db.collection('scores')
                     .orderBy('score', 'desc')
-                    .limit(10)
+                    .limit(3)
                     .get();
                 
-                leaderboardLoaded = true;
-                const entries = document.getElementById('leaderboardEntries');
+                topLeaderboardLoaded = true;
+                const entries = document.getElementById('topLeaderboardEntries');
                 
                 if (snapshot.empty) {
                     entries.innerHTML = '<div class="lb-entry">Be the first to climb the ranks!</div>';
@@ -748,18 +817,54 @@
                 let html = '';
                 snapshot.docs.forEach((doc, idx) => {
                     const data = doc.data();
-                    const rankClass = idx < 3 ? `rank-${idx + 1}` : '';
+                    const rankClass = `top-rank-${idx + 1}`;
                     html += `
-                        <div class="lb-entry">
-                            <span class="lb-rank ${rankClass}">#${idx + 1}</span>
+                        <div class="top-lb-entry">
+                            <span class="top-rank ${rankClass}">#${idx + 1}</span>
                             <span>${data.name || 'Anonymous'} <span style="opacity:0.6;">(${data.score})</span></span>
                         </div>
                     `;
                 });
                 entries.innerHTML = html;
             } catch (e) {
-                console.error("Leaderboard error:", e);
-                document.getElementById('leaderboardEntries').innerHTML = 
+                console.error("Top leaderboard error:", e);
+                document.getElementById('topLeaderboardEntries').innerHTML = 
+                    `<div class="lb-error">Failed to load top players. Please refresh.</div>`;
+            }
+        }
+
+        async function loadFullLeaderboard() {
+            if (leaderboardLoaded) return;
+            
+            try {
+                const snapshot = await db.collection('scores')
+                    .orderBy('score', 'desc')
+                    .limit(20)
+                    .get();
+                
+                leaderboardLoaded = true;
+                const entries = document.getElementById('fullLeaderboardEntries');
+                
+                if (snapshot.empty) {
+                    entries.innerHTML = '<div class="full-lb-entry">Be the first to climb the ranks!</div>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.docs.forEach((doc, idx) => {
+                    const data = doc.data();
+                    const rankClass = idx < 3 ? `full-rank-${idx + 1}` : '';
+                    html += `
+                        <div class="full-lb-entry">
+                            <span class="full-rank ${rankClass}">#${idx + 1}</span>
+                            <span>${data.name || 'Anonymous'} <span style="opacity:0.6;">(${data.score})</span></span>
+                        </div>
+                    `;
+                });
+                entries.innerHTML = html;
+            } catch (e) {
+                console.error("Full leaderboard error:", e);
+                document.getElementById('fullLeaderboardEntries').innerHTML = 
                     `<div class="lb-error">Failed to load leaderboard. Please refresh.</div>`;
             }
         }
