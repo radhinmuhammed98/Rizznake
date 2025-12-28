@@ -7,18 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Radhin">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
-            --bg: #0f1a0f;
-            --panel: #1a2a1a;
-            --text: #e0f0e0;
-            --border: #2d402d;
-            --glow: rgba(46, 184, 46, 0.6);
+            --bg: #0c140c;
+            --panel: #162316;
+            --text: #c0f0c0;
+            --border: #253325;
+            --glow: rgba(0, 200, 0, 0.5);
             --dash: #e5c53d;
             --vasu: #a83636;
             --sayip: #3d6cb5;
@@ -36,23 +34,30 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
+            /* CRT Scanlines */
+            background-image: 
+                linear-gradient(rgba(0, 30, 0, 0.15) 50%, transparent 50%),
+                linear-gradient(90deg, rgba(0, 30, 0, 0.15) 50%, transparent 50%);
+            background-size: 4px 4px;
         }
 
-        .user-display {
-            background: rgba(0,0,0,0.4);
-            padding: 8px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            border: 1px solid var(--border);
+        .header {
+            text-align: center;
+            margin: 15px 0 25px;
         }
-        .user-display span { color: #aaffaa; }
+        .logo {
+            font-size: 36px;
+            text-shadow: 0 0 10px var(--glow), 2px 2px 0 var(--border);
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 12px;
+            opacity: 0.7;
+            max-width: 400px;
+            line-height: 1.5;
+        }
 
-        /* Rest of your existing styles... */
-        .header { text-align: center; margin: 10px 0 25px; }
-        .logo { font-size: 36px; text-shadow: 0 0 8px var(--glow), 2px 2px 0 var(--border); margin-bottom: 8px; }
-        .subtitle { font-size: 12px; opacity: 0.7; max-width: 400px; line-height: 1.5; }
-        
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -69,29 +74,54 @@
             padding: 16px 10px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
-        .char-card:hover { transform: translateY(-4px); }
+        .char-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5), 0 0 8px var(--glow);
+        }
 
         .char-img {
-            width: 80px; height: 80px; margin: 0 auto 10px;
-            border-radius: 50%; overflow: hidden; border: 2px solid var(--border);
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            position: relative;
         }
-        .char-img img, .char-img.fallback {
-            width: 100%; height: 100%; object-fit: cover;
-            display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white;
+        .char-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .char-img .fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
         }
         .char-0 .fallback { background: var(--dash); }
         .char-1 .fallback { background: var(--vasu); }
         .char-2 .fallback { background: var(--sayip); }
 
-        .char-name { font-size: 15px; font-weight: bold; margin: 6px 0; }
+        .char-name {
+            font-size: 15px;
+            font-weight: bold;
+            margin: 6px 0;
+        }
         .char-0 .char-name { color: var(--dash); }
         .char-1 .char-name { color: var(--vasu); }
         .char-2 .char-name { color: var(--sayip); }
 
         .leaderboard {
-            background: rgba(20, 35, 20, 0.6);
+            background: rgba(10, 20, 10, 0.7);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 15px;
@@ -99,8 +129,19 @@
             max-width: 500px;
             margin: 10px 0;
         }
-        .lb-title { text-align: center; font-size: 14px; margin-bottom: 12px; color: #aaffaa; }
-        .lb-entry { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; }
+        .lb-title {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #aaffaa;
+            text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
+        }
+        .lb-entry {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 5px 0;
+        }
         .rank-1 { color: gold; }
         .rank-2 { color: silver; }
         .rank-3 { color: #cd7f32; }
@@ -117,7 +158,7 @@
         /* Name Modal */
         #nameModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex; align-items: center; justify-content: center;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
@@ -129,11 +170,13 @@
             text-align: center;
             max-width: 320px;
             width: 90%;
+            box-shadow: 0 0 15px var(--glow);
         }
         .modal-content input {
             width: 100%; padding: 10px; margin: 15px 0;
-            background: #0f1a0f; border: 1px solid var(--border);
+            background: #0a120a; border: 1px solid var(--border);
             color: var(--text); font-family: inherit; font-size: 14px;
+            text-align: center;
         }
         .modal-btn {
             background: var(--border);
@@ -144,24 +187,25 @@
             font-size: 12px;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.2s;
         }
+        .modal-btn:hover {
+            background: #3a503a;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <!-- Name Modal (shown once) -->
+    <!-- Name Modal (shown after character select) -->
     <div id="nameModal" class="hidden">
         <div class="modal-content">
             <h3>ENTER RIZZ NAME</h3>
-            <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 characters. No special symbols.</p>
-            <input type="text" id="playerName" maxlength="12" placeholder="e.g., SnakeMaster">
+            <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 letters/numbers only</p>
+            <input type="text" id="playerName" maxlength="12" placeholder="e.g., SnakeMaster" autofocus>
             <br>
-            <button class="modal-btn" onclick="saveName()">START GAME</button>
+            <button class="modal-btn" onclick="confirmName()">START GAME</button>
         </div>
-    </div>
-
-    <!-- User Display -->
-    <div class="user-display">
-        PLAYER: <span id="displayName">Loading...</span>
     </div>
 
     <div class="header">
@@ -170,23 +214,23 @@
     </div>
 
     <div class="grid">
-        <div class="char-card char-0" onclick="play(0)">
+        <div class="char-card char-0" onclick="selectChar(0)">
             <div class="char-img">
-                <img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.style.display='none'">
+                <img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.nextElementSibling.style.display='flex'">
                 <div class="fallback">D</div>
             </div>
             <div class="char-name">DASHAMOOLAM</div>
         </div>
-        <div class="char-card char-1" onclick="play(1)">
+        <div class="char-card char-1" onclick="selectChar(1)">
             <div class="char-img">
-                <img src="vasu.jpg" alt="Vasu" onerror="this.style.display='none'">
+                <img src="vasu.jpg" alt="Vasu" onerror="this.nextElementSibling.style.display='flex'">
                 <div class="fallback">V</div>
             </div>
             <div class="char-name">VASU</div>
         </div>
-        <div class="char-card char-2" onclick="play(2)">
+        <div class="char-card char-2" onclick="selectChar(2)">
             <div class="char-img">
-                <img src="sayip.jpg" alt="Sayip" onerror="this.style.display='none'">
+                <img src="sayip.jpg" alt="Sayip" onerror="this.nextElementSibling.style.display='flex'">
                 <div class="fallback">S</div>
             </div>
             <div class="char-name">SAYIP</div>
@@ -201,44 +245,26 @@
     <div class="watermark">Rizznake © Radhin • 2024</div>
 
     <script>
-        // ================== FIREBASE CONFIG ==================
-        // 👇 REPLACE THIS WITH YOUR ACTUAL CONFIG FROM STEP 1 👇
-       const firebaseConfig = {
-          apiKey: "AIzaSyCaa9IHlcKGdUEZjf0BpdBEFUB8KoppVP0",
-          authDomain: "rizznake-2cc02.firebaseapp.com",
-          projectId: "rizznake-2cc02",
-          storageBucket: "rizznake-2cc02.firebasestorage.app",
-          messagingSenderId: "176358385186",
-          appId: "1:176358385186:web:68c6c662895eb512034c7b"
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaa9IHlcKGdUEZjf0BpdBEFUB8KoppVP0",
+            authDomain: "rizznake-2cc02.firebaseapp.com",
+            projectId: "rizznake-2cc02",
+            storageBucket: "rizznake-2cc02.firebasestorage.app",
+            messagingSenderId: "176358385186",
+            appId: "1:176358385186:web:68c6c662895eb512034c7b"
         };
-
-        // 👆 REPLACE THIS WITH YOUR ACTUAL CONFIG 👆
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ================== USER IDENTITY ==================
-        function getOrCreateUser() {
-            let uid = localStorage.getItem('rizz_uid');
-            let name = localStorage.getItem('rizz_name');
-            
-            if (!uid) {
-                // Generate anonymous UID (random 16-char hex)
-                uid = Math.random().toString(36).substring(2, 15) + 
-                      Math.random().toString(36).substring(2, 15);
-                localStorage.setItem('rizz_uid', uid);
-            }
-            
-            if (!name) {
-                document.getElementById('nameModal').classList.remove('hidden');
-                return null;
-            }
-            
-            return { uid, name };
+        let selectedChar = null;
+
+        function selectChar(charIdx) {
+            selectedChar = charIdx;
+            document.getElementById('nameModal').classList.remove('hidden');
         }
 
-        function saveName() {
+        function confirmName() {
             const input = document.getElementById('playerName');
             let name = input.value.trim();
             
@@ -247,20 +273,19 @@
                 return;
             }
             
-            // Remove special characters (keep letters, numbers, spaces)
-            name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+            name = name.replace(/[^a-zA-Z0-9]/g, '');
             if (name.length < 3) {
-                alert('Name must contain letters/numbers');
+                alert('Use only letters and numbers');
                 return;
             }
             
+            // Save name in localStorage
             localStorage.setItem('rizz_name', name);
-            document.getElementById('displayName').textContent = name;
-            document.getElementById('nameModal').classList.add('hidden');
-            loadLeaderboard();
+            
+            // Go to game with char + name
+            window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(name)}`;
         }
 
-        // ================== LEADERBOARD ==================
         async function loadLeaderboard() {
             try {
                 const snapshot = await db.collection('scores')
@@ -291,24 +316,7 @@
             }
         }
 
-        // ================== GAME START ==================
-        function play(charIdx) {
-            const user = getOrCreateUser();
-            if (!user) {
-                alert('Please enter a name first!');
-                return;
-            }
-            window.location.href = `game.html?char=${charIdx}&name=${encodeURIComponent(user.name)}`;
-        }
-
-        // ================== INIT ==================
-        window.addEventListener('load', () => {
-            const user = getOrCreateUser();
-            if (user) {
-                document.getElementById('displayName').textContent = user.name;
-                loadLeaderboard();
-            }
-        });
+        window.addEventListener('load', loadLeaderboard);
     </script>
 </body>
 </html>
