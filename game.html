@@ -375,22 +375,32 @@ function loadScores() {
 }
 
 // Save score locally and submit asynchronously
+// Load global best from localStorage
+function loadScores() {
+  const savedBest = localStorage.getItem('rizznake_best_global');
+  gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
+  document.getElementById('bestVal').textContent = gameState.bestScore;
+}
+
+// Save score locally and submit asynchronously if it's higher
 function saveScore() {
-  // Update local/global best immediately
+  // Only proceed if current score beats local top score
   if (gameState.score > gameState.bestScore) {
+    // Update local/global best immediately
     gameState.bestScore = gameState.score;
     localStorage.setItem('rizznake_best_global', gameState.bestScore);
     document.getElementById('bestVal').textContent = gameState.bestScore;
-  }
 
-  // Submit asynchronously, don't block the UI
-  submitScore(); 
+    // Submit asynchronously (no await)
+    submitScore();
+  } else {
+    console.log("Score not high enough to submit. Local best:", gameState.bestScore);
+  }
 }
 
-// Optimized submit to Firebase
+// Optimized Firebase submit using cached doc ID
 async function submitScore() {
   try {
-    // Check for cached document ID
     let playerDocId = localStorage.getItem('rizznake_docid');
 
     if (playerDocId) {
@@ -399,14 +409,14 @@ async function submitScore() {
         score: gameState.score,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log("Score updated quickly via cached doc ID!");
+      console.log("Score updated via cached doc ID!");
       return;
     }
 
-    // First submission or cache missing: check for existing score
+    // First submission: fetch existing score for this player
     const snapshot = await db.collection('scores')
       .where('playerId', '==', gameState.playerId)
-      .limit(1) // fetch only 1 document
+      .limit(1)
       .get();
 
     if (!snapshot.empty) {
@@ -414,11 +424,17 @@ async function submitScore() {
       playerDocId = doc.id;
       localStorage.setItem('rizznake_docid', playerDocId);
 
-      await doc.ref.update({
-        score: gameState.score,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      console.log("Score updated for existing player (first time caching doc)!");
+      // Only update if current score > existing score
+      const existingScore = doc.data().score || 0;
+      if (gameState.score > existingScore) {
+        await doc.ref.update({
+          score: gameState.score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Score updated for top score (first submission)!");
+      } else {
+        console.log("Score not updated — existing top score is higher.");
+      }
     } else {
       // No document exists yet, create new
       const newDoc = await db.collection('scores').add({
@@ -436,6 +452,7 @@ async function submitScore() {
     console.error("Score submission failed:", e);
   }
 }
+
 
 // Example: fetching global leaderboard without duplicate names
 async function getGlobalLeaderboard(limit = 10) {
