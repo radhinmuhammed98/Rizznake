@@ -247,9 +247,27 @@ const GRID_H = 16;
 const BASE_SPEED = 130;
 
 const characters = [
-{ name: "Dashamoolam", color: "char-0", eatFreq: 600, dieFreq: 150, image: "daamu.jpg" },
-{ name: "Vasu", color: "char-1", eatFreq: 800, dieFreq: 120, image: "vasu.jpg" },
-{ name: "Sayip", color: "char-2", eatFreq: 1000, dieFreq: 100, image: "sayip.jpg" }
+  {
+    name: "Dashamoolam",
+    color: "char-0",
+    image: "dashamoolam.jpg",
+    eatSound: "eat-dashamoolam.mp3",
+    dieSound: "die-dashamoolam.mp3"
+  },
+  {
+    name: "Vasu",
+    color: "char-1",
+    image: "vasu.jpg",
+    eatSound: "eat-vasu.mp3",
+    dieSound: "die-vasu.mp3"
+  },
+  {
+    name: "Sayip",
+    color: "char-2",
+    image: "sayip.jpg",
+    eatSound: "eat-sayip.mp3",
+    dieSound: "die-sayip.mp3"
+  }
 ];
 
 // State
@@ -282,6 +300,7 @@ gameState.playerId = urlParams.get('id') || 'anonymous_' + Date.now();
 document.getElementById('playerNameDisplay').textContent = gameState.playerName;
 gameState.boardEl = document.getElementById('board');
 setupBoardDOM();
+preloadAudio();
 bindEvents();
 loadScores();
 loadMuteState();
@@ -311,31 +330,41 @@ return y * GRID_W + x;
 }
 
 // Audio
-function play(freq, duration = 0.1, type = 'sine', volume = 0.1) {
-if (gameState.muted || typeof AudioContext === 'undefined') return;
-try {
-if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-if (audioCtx.state === 'suspended') audioCtx.resume();
-const osc = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-osc.type = type;
-osc.frequency.value = freq;
-gain.gain.value = volume;
-gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.start();
-osc.stop(audioCtx.currentTime + duration);
-} catch(e) {}
+// Preload audio elements
+const audioElements = {};
+
+function preloadAudio() {
+  characters.forEach(char => {
+    // Create audio elements for eat sounds
+    audioElements[char.eatSound] = new Audio(char.eatSound);
+    audioElements[char.eatSound].load(); // Preload
+    
+    // Create audio elements for die sounds  
+    audioElements[char.dieSound] = new Audio(char.dieSound);
+    audioElements[char.dieSound].load();
+  });
+}
+
+function playSound(soundKey) {
+  if (gameState.muted) return;
+  
+  const originalSound = audioElements[soundKey];
+  if (originalSound) {
+    // Create a clone to allow overlapping sounds
+    const sound = originalSound.cloneNode();
+    sound.volume = 0.4;
+    sound.play().catch(e => console.warn("Audio play failed:", e));
+  }
 }
 
 function playEat() {
-const char = characters[gameState.charIdx];
-play(char.eatFreq, 0.1, 'sine', 0.2);
+  const char = characters[gameState.charIdx];
+  playSound(char.eatSound);
 }
+
 function playDie() {
-const char = characters[gameState.charIdx];
-play(char.dieFreq, 0.5, 'sawtooth', 0.3);
+  const char = characters[gameState.charIdx];
+  playSound(char.dieSound);
 }
 
 // Unified Scores (no per-character separation)
