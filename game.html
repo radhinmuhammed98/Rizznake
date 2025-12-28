@@ -51,6 +51,9 @@
             margin-bottom: 10px;
             font-size: 13px;
             border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
         }
         .player-display span { color: #aaffaa; }
 
@@ -358,55 +361,35 @@
             play(char.dieFreq, 0.5, 'sawtooth', 0.3);
         }
 
-        // Scores
+        // Unified Scores (no per-character separation)
         function loadScores() {
-            // Load global best score for this character
-            const savedBest = localStorage.getItem(`rizznake_best_${gameState.charIdx}`);
+            // Load global best score (across all characters)
+            const savedBest = localStorage.getItem('rizznake_best_global');
             gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
             document.getElementById('bestVal').textContent = gameState.bestScore;
         }
 
-        async function saveScoreToFirebase() {
-            if (gameState.score <= 0) return;
+        async function saveScore() {
+            if (gameState.score <= gameState.bestScore) return;
+            
+            // Update local best score (global, not per character)
+            gameState.bestScore = gameState.score;
+            localStorage.setItem('rizznake_best_global', gameState.bestScore);
+            document.getElementById('bestVal').textContent = gameState.bestScore;
             
             try {
-                // Get current timestamp
-                const timestamp = new Date();
-                
-                // Create score document
-                const scoreData = {
+                // Save to Firebase
+                await db.collection('scores').add({
                     name: gameState.playerName,
                     playerId: gameState.playerId,
                     score: gameState.score,
                     character: gameState.charIdx,
                     characterName: characters[gameState.charIdx].name,
-                    timestamp: firebase.firestore.Timestamp.fromDate(timestamp)
-                };
-                
-                // Save to Firestore
-                const docRef = await db.collection('scores').add(scoreData);
-                
-                console.log("Score submitted to Firebase! ID:", docRef.id);
-                return true;
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("Score submitted successfully!");
             } catch (e) {
-                console.error("Firebase submit error:", e);
-                alert("Failed to submit score. Your score was saved locally.");
-                return false;
-            }
-        }
-
-        function saveScoreLocally() {
-            // Save personal best for this character
-            if (gameState.score > gameState.bestScore) {
-                gameState.bestScore = gameState.score;
-                localStorage.setItem(`rizznake_best_${gameState.charIdx}`, gameState.bestScore);
-                document.getElementById('bestVal').textContent = gameState.bestScore;
-            }
-            
-            // Save all-time personal best
-            const allTimeBest = parseInt(localStorage.getItem('rizznake_alltime_best') || '0');
-            if (gameState.score > allTimeBest) {
-                localStorage.setItem('rizznake_alltime_best', gameState.score);
+                console.error("Score submit failed:", e);
             }
         }
 
@@ -520,11 +503,8 @@
             // Show final score
             document.getElementById('finalScore').textContent = gameState.score;
             
-            // Save score locally first (always works)
-            saveScoreLocally();
-            
-            // Try to save to Firebase (may fail if offline)
-            saveScoreToFirebase().catch(console.error);
+            // Save score (unified system)
+            saveScore();
             
             // Show game over screen
             document.getElementById('game-overlay').classList.remove('hidden');
