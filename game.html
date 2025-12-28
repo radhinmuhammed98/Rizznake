@@ -232,6 +232,9 @@
         <div id="board" class="board"></div>
         <div id="game-overlay" class="hidden">
             <h2>GAME OVER</h2>
+            <div style="margin: 15px 0; font-size: 14px;">
+                Your score: <span id="finalScore">0</span>
+            </div>
             <div class="overlay-btns">
                 <button class="game-btn" onclick="resetGame()">RESTART</button>
                 <button class="game-btn" onclick="location.href='index.html'">MENU</button>
@@ -277,6 +280,7 @@
             score: 0,
             bestScore: 0,
             charIdx: 0,
+            playerId: '',
             playerName: 'Anonymous',
             running: false,
             muted: false,
@@ -292,6 +296,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             gameState.charIdx = parseInt(urlParams.get('char')) || 0;
             gameState.playerName = urlParams.get('name') || 'Anonymous';
+            gameState.playerId = urlParams.get('id') || 'anonymous_' + Date.now();
             
             document.getElementById('playerNameDisplay').textContent = gameState.playerName;
             
@@ -355,28 +360,53 @@
 
         // Scores
         function loadScores() {
+            // Load global best score for this character
             const savedBest = localStorage.getItem(`rizznake_best_${gameState.charIdx}`);
             gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
             document.getElementById('bestVal').textContent = gameState.bestScore;
         }
 
-        async function submitScore() {
-            if (gameState.score <= gameState.bestScore) return;
-            
-            gameState.bestScore = gameState.score;
-            localStorage.setItem(`rizznake_best_${gameState.charIdx}`, gameState.bestScore);
-            document.getElementById('bestVal').textContent = gameState.bestScore;
+        async function saveScoreToFirebase() {
+            if (gameState.score <= 0) return;
             
             try {
-                await db.collection('scores').add({
+                // Get current timestamp
+                const timestamp = new Date();
+                
+                // Create score document
+                const scoreData = {
                     name: gameState.playerName,
+                    playerId: gameState.playerId,
                     score: gameState.score,
                     character: gameState.charIdx,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log("Score submitted to Firebase!");
+                    characterName: characters[gameState.charIdx].name,
+                    timestamp: firebase.firestore.Timestamp.fromDate(timestamp)
+                };
+                
+                // Save to Firestore
+                const docRef = await db.collection('scores').add(scoreData);
+                
+                console.log("Score submitted to Firebase! ID:", docRef.id);
+                return true;
             } catch (e) {
                 console.error("Firebase submit error:", e);
+                alert("Failed to submit score. Your score was saved locally.");
+                return false;
+            }
+        }
+
+        function saveScoreLocally() {
+            // Save personal best for this character
+            if (gameState.score > gameState.bestScore) {
+                gameState.bestScore = gameState.score;
+                localStorage.setItem(`rizznake_best_${gameState.charIdx}`, gameState.bestScore);
+                document.getElementById('bestVal').textContent = gameState.bestScore;
+            }
+            
+            // Save all-time personal best
+            const allTimeBest = parseInt(localStorage.getItem('rizznake_alltime_best') || '0');
+            if (gameState.score > allTimeBest) {
+                localStorage.setItem('rizznake_alltime_best', gameState.score);
             }
         }
 
@@ -486,7 +516,17 @@
         function endGame() {
             gameState.running = false;
             playDie();
-            submitScore();
+            
+            // Show final score
+            document.getElementById('finalScore').textContent = gameState.score;
+            
+            // Save score locally first (always works)
+            saveScoreLocally();
+            
+            // Try to save to Firebase (may fail if offline)
+            saveScoreToFirebase().catch(console.error);
+            
+            // Show game over screen
             document.getElementById('game-overlay').classList.remove('hidden');
         }
 
