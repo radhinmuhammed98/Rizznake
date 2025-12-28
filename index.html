@@ -6,7 +6,7 @@
     <meta name="description" content="A modern retro twist on Snake. Choose your persona, chase glory, and dominate the leaderboard.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Radhin">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -20,6 +20,7 @@
             --dash: #e5c53d;
             --vasu: #a83636;
             --sayip: #3d6cb5;
+            --menu-highlight: #2d402d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +32,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             position: relative;
             overflow-x: hidden;
             /* CRT Scanlines */
@@ -41,15 +42,67 @@
             background-size: 4px 4px;
         }
 
+        /* Top user display panel */
+        .user-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 10px 15px;
+            background: rgba(10, 20, 10, 0.7);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+        }
+        .user-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #aaffaa;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 3px 8px;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .logout-btn:hover {
+            background: var(--border);
+        }
+
         .header {
             text-align: center;
-            margin: 15px 0 25px;
+            margin: 10px 0 20px;
+            width: 100%;
         }
         .logo {
             font-size: 36px;
             text-shadow: 0 0 10px var(--glow), 2px 2px 0 var(--border);
             margin-bottom: 8px;
             letter-spacing: -1px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
         }
         .subtitle {
             font-size: 12px;
@@ -58,13 +111,55 @@
             line-height: 1.5;
         }
 
+        /* Navigation Tabs - Retro Style */
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        .nav-tab {
+            background: rgba(20, 35, 20, 0.6);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            flex: 1;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .nav-tab:hover {
+            background: rgba(30, 45, 30, 0.8);
+        }
+        .nav-tab.active {
+            background: var(--panel);
+            border-top: 2px solid var(--glow);
+            border-left: 1px solid var(--glow);
+            border-right: 1px solid var(--glow);
+            font-weight: bold;
+        }
+        .tab-content {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 500px;
-            margin-bottom: 25px;
+            margin: 0 auto;
         }
 
         .char-card {
@@ -120,6 +215,12 @@
         .char-1 .char-name { color: var(--vasu); }
         .char-2 .char-name { color: var(--sayip); }
 
+        .char-desc {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 3px;
+        }
+
         .leaderboard {
             background: rgba(10, 20, 10, 0.7);
             border: 1px solid var(--border);
@@ -127,7 +228,7 @@
             padding: 15px;
             width: 100%;
             max-width: 500px;
-            margin: 10px 0;
+            margin: 0 auto;
         }
         .lb-title {
             text-align: center;
@@ -146,6 +247,31 @@
         .rank-2 { color: silver; }
         .rank-3 { color: #cd7f32; }
 
+        /* About/Help content styling */
+        .info-section {
+            background: rgba(10, 20, 10, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            line-height: 1.5;
+            font-size: 12px;
+        }
+        .info-section h3 {
+            margin-bottom: 10px;
+            color: #aaffaa;
+            font-size: 16px;
+        }
+        .info-section p {
+            margin-bottom: 8px;
+        }
+        .info-section ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .info-section li {
+            margin-bottom: 5px;
+        }
+
         .watermark {
             position: absolute;
             bottom: 12px;
@@ -154,12 +280,20 @@
             font-size: 10px;
             opacity: 0.5;
         }
+        .version {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            opacity: 0.4;
+        }
 
         /* Name Modal */
-        #nameModal {
+        #nameModal, #changeNameModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            display: none; /* Changed from hidden class to inline style */
+            display: none;
             align-items: center; justify-content: center;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
@@ -173,75 +307,164 @@
             width: 90%;
             box-shadow: 0 0 15px var(--glow);
         }
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: #aaffaa;
+        }
         .modal-content input {
             width: 100%; padding: 10px; margin: 15px 0;
             background: #0a120a; border: 1px solid var(--border);
             color: var(--text); font-family: inherit; font-size: 14px;
             text-align: center;
         }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
         .modal-btn {
             background: var(--border);
             color: var(--text);
             border: none;
-            padding: 10px 20px;
+            padding: 8px 15px;
             font-family: inherit;
             font-size: 12px;
             cursor: pointer;
-            margin-top: 10px;
             transition: background 0.2s;
         }
         .modal-btn:hover {
             background: #3a503a;
         }
+        .modal-btn.secondary {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .name-error {
+            color: var(--vasu);
+            font-size: 11px;
+            margin-top: 5px;
+            min-height: 16px;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <!-- Name Modal (shown after character select) -->
     <div id="nameModal">
         <div class="modal-content">
-            <h3>ENTER RIZZ NAME</h3>
-            <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 letters/numbers only</p>
-            <input type="text" id="playerName" maxlength="12" placeholder="e.g., SnakeMaster" autofocus>
-            <br>
-            <button class="modal-btn" onclick="confirmName()">START GAME</button>
+            <h3>CHOOSE YOUR RIZZ NAME</h3>
+            <p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 letters/numbers. Must be unique.</p>
+            <input type="text" id="playerName" maxlength="12" placeholder="Enter unique name" autofocus>
+            <div class="name-error" id="nameError"></div>
+            <div class="modal-btns">
+                <button class="modal-btn secondary" onclick="document.getElementById('nameModal').style.display='none'">CANCEL</button>
+                <button class="modal-btn" onclick="confirmName()">CONFIRM</button>
+            </div>
         </div>
+    </div>
+    
+    <!-- Change Name Modal -->
+    <div id="changeNameModal">
+        <div class="modal-content">
+            <h3>CHANGE YOUR NAME</h3>
+            <p style="font-size:10px;opacity:0.7;margin:10px 0;">Your current ID will be preserved</p>
+            <input type="text" id="newPlayerName" maxlength="12" placeholder="New name">
+            <div class="name-error" id="changeNameError"></div>
+            <div class="modal-btns">
+                <button class="modal-btn secondary" onclick="document.getElementById('changeNameModal').style.display='none'">CANCEL</button>
+                <button class="modal-btn" onclick="changeName()">UPDATE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top User Panel -->
+    <div class="user-panel">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div class="user-name" id="displayName">GUEST</div>
+        </div>
+        <button class="logout-btn" onclick="changeNamePrompt()">CHANGE NAME</button>
     </div>
 
     <div class="header">
         <h1 class="logo">RIZZNAKE</h1>
-        <p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot.</p>
+        <p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot on the global leaderboard.</p>
     </div>
-
-    <div class="grid">
-        <div class="char-card char-0" onclick="selectChar(0)">
-            <div class="char-img">
-                <img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.nextElementSibling.style.display='flex'">
-                <div class="fallback">D</div>
-            </div>
-            <div class="char-name">DASHAMOOLAM</div>
-        </div>
-        <div class="char-card char-1" onclick="selectChar(1)">
-            <div class="char-img">
-                <img src="vasu.jpg" alt="Vasu" onerror="this.nextElementSibling.style.display='flex'">
-                <div class="fallback">V</div>
-            </div>
-            <div class="char-name">VASU</div>
-        </div>
-        <div class="char-card char-2" onclick="selectChar(2)">
-            <div class="char-img">
-                <img src="sayip.jpg" alt="Sayip" onerror="this.nextElementSibling.style.display='flex'">
-                <div class="fallback">S</div>
-            </div>
-            <div class="char-name">SAYIP</div>
-        </div>
+    
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="play">PLAY</div>
+        <div class="nav-tab" data-tab="leaderboard">LEADERBOARD</div>
+        <div class="nav-tab" data-tab="about">ABOUT</div>
+        <div class="nav-tab" data-tab="help">HELP</div>
     </div>
-
-    <div class="leaderboard">
-        <div class="lb-title">RIZZ LEADERBOARD</div>
-        <div class="lb-entries" id="leaderboardEntries">Loading...</div>
+    
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="play-tab">
+            <div class="grid">
+                <div class="char-card char-0" onclick="selectChar(0)">
+                    <div class="char-img">
+                        <img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.nextElementSibling.style.display='flex'">
+                        <div class="fallback">D</div>
+                    </div>
+                    <div class="char-name">DASHAMOOLAM</div>
+                    <div class="char-desc">Chill • Minimal • Focused</div>
+                </div>
+                <div class="char-card char-1" onclick="selectChar(1)">
+                    <div class="char-img">
+                        <img src="vasu.jpg" alt="Vasu" onerror="this.nextElementSibling.style.display='flex'">
+                        <div class="fallback">V</div>
+                    </div>
+                    <div class="char-name">VASU</div>
+                    <div class="char-desc">Aggressive • Bold • Fast</div>
+                </div>
+                <div class="char-card char-2" onclick="selectChar(2)">
+                    <div class="char-img">
+                        <img src="sayip.jpg" alt="Sayip" onerror="this.nextElementSibling.style.display='flex'">
+                        <div class="fallback">S</div>
+                    </div>
+                    <div class="char-name">SAYIP</div>
+                    <div class="char-desc">Chaos • Unpredictable • Wild</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-pane" id="leaderboard-tab">
+            <div class="leaderboard">
+                <div class="lb-title">GLOBAL RIZZ RANKINGS</div>
+                <div class="lb-entries" id="leaderboardEntries">Loading...</div>
+            </div>
+        </div>
+        
+        <div class="tab-pane" id="about-tab">
+            <div class="info-section">
+                <h3>ABOUT RIZZNAKE</h3>
+                <p>Rizznake is a modern retro twist on the classic Snake game, featuring unique character personalities and a global leaderboard.</p>
+                <p>Created with love by Radhin, this game combines nostalgic 90s aesthetics with modern web technologies.</p>
+                <p>Version 1.2 • © 2024 Radhin Inc.</p>
+            </div>
+        </div>
+        
+        <div class="tab-pane" id="help-tab">
+            <div class="info-section">
+                <h3>HOW TO PLAY</h3>
+                <p>Guide your snake to eat food while avoiding walls and your own tail.</p>
+                <ul>
+                    <li><strong>Desktop:</strong> Use arrow keys to control the snake</li>
+                    <li><strong>Mobile:</strong> Swipe in the direction you want to go</li>
+                    <li><strong>Scoring:</strong> Each food item is worth 10 points</li>
+                    <li><strong>Characters:</strong> Each has unique sound effects and visual style</li>
+                </ul>
+                <p>Pro tip: Longer snakes are harder to control. Plan your moves ahead!</p>
+            </div>
+        </div>
     </div>
 
     <div class="watermark">Rizznake © Radhin • 2024</div>
+    <div class="version">v1.2.0</div>
 
     <script>
         // Firebase Config
@@ -257,9 +480,30 @@
         const db = firebase.firestore();
 
         let selectedChar = null;
+        let currentUser = null;
+
+        // Navigation tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Load leaderboard when tab is shown
+                if (tabId === 'leaderboard' && !document.getElementById('leaderboardEntries').hasChildNodes()) {
+                    loadLeaderboard();
+                }
+            });
+        });
 
         // Generate or retrieve player ID and name
-        function getPlayerData() {
+        function initUser() {
             let playerId = localStorage.getItem('rizz_player_id');
             let playerName = localStorage.getItem('rizz_player_name');
             
@@ -269,46 +513,136 @@
                 localStorage.setItem('rizz_player_id', playerId);
             }
             
-            return { id: playerId, name: playerName || null };
+            currentUser = { id: playerId, name: playerName || null };
+            
+            if (playerName) {
+                document.getElementById('displayName').textContent = playerName;
+                // Set avatar initial
+                document.getElementById('userAvatar').textContent = playerName.charAt(0).toUpperCase();
+            } else {
+                document.getElementById('nameModal').style.display = 'flex';
+            }
+        }
+
+        // Check if username exists in database
+        async function isUsernameTaken(username) {
+            try {
+                const snapshot = await db.collection('scores')
+                    .where('name', '==', username)
+                    .limit(1)
+                    .get();
+                return !snapshot.empty;
+            } catch (e) {
+                console.error("Username check error:", e);
+                return false; // In case of error, allow the name
+            }
         }
 
         // Show name modal when character is selected
         function selectChar(charIdx) {
             selectedChar = charIdx;
-            const player = getPlayerData();
             
-            if (player.name) {
-                // Player already has a name, go directly to game
-                window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(player.name)}&id=${player.id}`;
-            } else {
-                // Show name modal
+            if (!currentUser.name) {
                 document.getElementById('nameModal').style.display = 'flex';
+            } else {
+                startGame();
             }
         }
 
         function confirmName() {
             const input = document.getElementById('playerName');
             let name = input.value.trim();
+            const errorEl = document.getElementById('nameError');
+            
+            errorEl.textContent = '';
             
             if (name.length < 3 || name.length > 12) {
-                alert('Name must be 3-12 characters');
+                errorEl.textContent = 'Name must be 3-12 characters';
                 return;
             }
             
             // Allow only letters, numbers, and spaces
             name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
             if (name.length < 3) {
-                alert('Use only letters and numbers');
+                errorEl.textContent = 'Use only letters and numbers';
                 return;
             }
             
-            const player = getPlayerData();
+            // Check if name is unique
+            isUsernameTaken(name).then(isTaken => {
+                if (isTaken) {
+                    errorEl.textContent = 'Name already taken! Try another.';
+                    return;
+                }
+                
+                // Save name to localStorage
+                localStorage.setItem('rizz_player_name', name);
+                currentUser.name = name;
+                
+                document.getElementById('displayName').textContent = name;
+                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                
+                // Close modal and start game
+                document.getElementById('nameModal').style.display = 'none';
+                startGame();
+            });
+        }
+
+        function changeNamePrompt() {
+            document.getElementById('changeNameModal').style.display = 'flex';
+            document.getElementById('newPlayerName').value = currentUser.name || '';
+        }
+
+        function changeName() {
+            const input = document.getElementById('newPlayerName');
+            let name = input.value.trim();
+            const errorEl = document.getElementById('changeNameError');
             
-            // Save name to localStorage
-            localStorage.setItem('rizz_player_name', name);
+            errorEl.textContent = '';
             
-            // Go to game with char + name + id
-            window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(name)}&id=${player.id}`;
+            if (name.length < 3 || name.length > 12) {
+                errorEl.textContent = 'Name must be 3-12 characters';
+                return;
+            }
+            
+            // Allow only letters, numbers, and spaces
+            name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+            if (name.length < 3) {
+                errorEl.textContent = 'Use only letters and numbers';
+                return;
+            }
+            
+            // Check if name is unique
+            isUsernameTaken(name).then(isTaken => {
+                if (isTaken) {
+                    errorEl.textContent = 'Name already taken! Try another.';
+                    return;
+                }
+                
+                // Save name to localStorage
+                localStorage.setItem('rizz_player_name', name);
+                currentUser.name = name;
+                
+                document.getElementById('displayName').textContent = name;
+                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                
+                // Close modal
+                document.getElementById('changeNameModal').style.display = 'none';
+                
+                // Reload leaderboard to reflect new name
+                if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+                    loadLeaderboard();
+                }
+            });
+        }
+
+        function startGame() {
+            if (!currentUser.name) {
+                document.getElementById('nameModal').style.display = 'flex';
+                return;
+            }
+            
+            window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.id}`;
         }
 
         async function loadLeaderboard() {
@@ -320,7 +654,7 @@
                 
                 const entries = document.getElementById('leaderboardEntries');
                 if (snapshot.empty) {
-                    entries.innerHTML = '<div class="lb-entry">No scores yet. Be the first!</div>';
+                    entries.innerHTML = '<div class="lb-entry">Be the first to climb the ranks!</div>';
                     return;
                 }
 
@@ -331,7 +665,7 @@
                     html += `
                         <div class="lb-entry">
                             <span class="lb-rank ${rankClass}">#${idx + 1}</span>
-                            <span>${data.name || 'Anonymous'} (${data.score})</span>
+                            <span>${data.name || 'Anonymous'} <span style="opacity:0.6;">(${data.score})</span></span>
                         </div>
                     `;
                 });
@@ -345,7 +679,11 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadLeaderboard();
+            initUser();
+            // Load leaderboard if visible
+            if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+                loadLeaderboard();
+            }
         });
     </script>
 </body>
