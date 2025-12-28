@@ -597,22 +597,41 @@ document.getElementById('userAvatar').textContent = playerName ? playerName.char
 
 // Load top leaderboard on init
 loadTopLeaderboard();
+
+// Force fresh leaderboard load if user just came back from game
+if (performance.navigation && performance.navigation.type === 2) {
+  // User navigated back
+  topLeaderboardLoaded = false;
+  leaderboardLoaded = false;
+  loadTopLeaderboard();
+  
+  // Also refresh full leaderboard if user is on that tab
+  if (document.querySelector('.nav-tab[data-tab="leaderboard"]').classList.contains('active')) {
+    loadFullLeaderboard();
+  }
+}
+
+  if (window.performance.getEntriesByType('navigation')[0]?.type === 'back_forward') {
+  // refresh logic here
+}
 }
 
 // Check if username exists in database
 async function isUsernameTaken(username) {
-try {
-// First filter out current user's scores
-const snapshot = await db.collection('scores')
-.where('name', '==', username)
-.where('playerId', '!=', currentUser.playerId)
-.limit(1)
-.get();
-return !snapshot.empty;
-} catch (e) {
-console.error("Username check error:", e);
-return false; // In case of error, allow the name
-}
+  try {
+    const query = db.collection('scores').where('name', '==', username);
+    
+    // Only exclude current user if we have a valid playerId
+    if (currentUser && currentUser.playerId) {
+      query.where('playerId', '!=', currentUser.playerId);
+    }
+    
+    const snapshot = await query.limit(1).get();
+    return !snapshot.empty;
+  } catch (e) {
+    console.error("Username check error:", e);
+    return false;
+  }
 }
 
 // Show name modal when character is selected
