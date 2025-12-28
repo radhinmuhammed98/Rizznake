@@ -42,6 +42,8 @@
                 linear-gradient(rgba(0, 25, 0, 0.1) 50%, transparent 50%),
                 linear-gradient(90deg, rgba(0, 25, 0, 0.1) 50%, transparent 50%);
             background-size: 3px 3px;
+            touch-action: none;
+            overscroll-behavior: none;
         }
 
         .player-display {
@@ -520,27 +522,60 @@
             if (key === 'ArrowRight' && gameState.dir.x === 0) gameState.nextDir = {x:1, y:0};
         }
 
-        let touchStart = {x:0, y:0};
+        // ---- Advanced touch control (angle based like reference game) ----
+
+        let touchStart = { x: 0, y: 0 };
+        let touchActive = false;
+
+        // Smaller = more sensitive (reference uses ~22)
+        const TOUCH_THRESHOLD = 14;
+
         function handleTouchStart(e) {
             if (!gameState.running) return;
+
             const t = e.touches[0];
             touchStart.x = t.clientX;
             touchStart.y = t.clientY;
+            touchActive = true;
         }
-        function handleTouchEnd(e) {
-            if (!gameState.running) return;
-            const t = e.changedTouches[0];
+
+        function handleTouchMove(e) {
+            if (!gameState.running || !touchActive) return;
+
+            const t = e.touches[0];
             const dx = t.clientX - touchStart.x;
             const dy = t.clientY - touchStart.y;
-            const absDx = Math.abs(dx), absDy = Math.abs(dy);
-            if (absDx < 20 && absDy < 20) return;
-            if (absDx > absDy) {
-                if (dx > 0 && gameState.dir.x === 0) gameState.nextDir = {x:1, y:0};
-                if (dx < 0 && gameState.dir.x === 0) gameState.nextDir = {x:-1, y:0};
-            } else {
-                if (dy > 0 && gameState.dir.y === 0) gameState.nextDir = {x:0, y:1};
-                if (dy < 0 && gameState.dir.y === 0) gameState.nextDir = {x:0, y:-1};
+
+            // Allow very small movement
+            if (Math.sqrt(dx * dx + dy * dy) < TOUCH_THRESHOLD) return;
+
+            // Reset origin for continuous turning
+            touchStart.x = t.clientX;
+            touchStart.y = t.clientY;
+
+            // Angle in degrees (0–360)
+            const angle = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+
+            // RIGHT
+            if ((angle >= 315 || angle < 45) && gameState.dir.x === 0) {
+                gameState.nextDir = { x: 1, y: 0 };
             }
+            // DOWN
+            else if (angle >= 45 && angle < 135 && gameState.dir.y === 0) {
+                gameState.nextDir = { x: 0, y: 1 };
+            }
+            // LEFT
+            else if (angle >= 135 && angle < 225 && gameState.dir.x === 0) {
+                gameState.nextDir = { x: -1, y: 0 };
+            }
+            // UP
+            else if (angle >= 225 && angle < 315 && gameState.dir.y === 0) {
+                gameState.nextDir = { x: 0, y: -1 };
+            }
+        }
+
+        function handleTouchEnd() {
+            touchActive = false;
         }
 
         // Mute
@@ -558,10 +593,14 @@
         // Bind
         function bindEvents() {
             window.addEventListener('keydown', handleKey);
-            document.addEventListener('touchstart', handleTouchStart, {passive: false});
-            document.addEventListener('touchend', handleTouchEnd, {passive: false});
+
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: true });
+            document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
             document.getElementById('muteBtn').addEventListener('click', toggleMute);
         }
+
 
         // Start
         window.addEventListener('load', init);
