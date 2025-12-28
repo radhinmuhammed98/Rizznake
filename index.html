@@ -557,30 +557,33 @@
         });
 
         // Generate or retrieve player ID and name
-        function initUser() {
-            let playerId = localStorage.getItem('rizz_player_id');
-            let playerName = localStorage.getItem('rizz_player_name');
-            
-            if (!playerId) {
-                // Generate unique anonymous ID
-                playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('rizz_player_id', playerId);
-            }
-            
-            currentUser = { id: playerId, name: playerName || null };
-            
-            if (playerName) {
-                document.getElementById('displayName').textContent = playerName;
-                // Set avatar initial
-                document.getElementById('userAvatar').textContent = playerName.charAt(0).toUpperCase();
-            } else {
-                document.getElementById('nameModal').style.display = 'flex';
-            }
-            
-            // Always load leaderboard on init
-            loadLeaderboard();
+    // MODIFIED initUser function - no longer shows modal on load
+    function initUser() {
+        let playerId = localStorage.getItem('rizz_player_id');
+        let playerName = localStorage.getItem('rizz_player_name');
+        
+        if (!playerId) {
+            playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            localStorage.setItem('rizz_player_id', playerId);
         }
-
+        
+        currentUser = { id: playerId, name: playerName || null };
+        
+        // Update user display - show GUEST if no name
+        const displayNameEl = document.getElementById('displayName');
+        const userAvatarEl = document.getElementById('userAvatar');
+        
+        if (playerName) {
+            displayNameEl.textContent = playerName;
+            userAvatarEl.textContent = playerName.charAt(0).toUpperCase();
+        } else {
+            displayNameEl.textContent = 'GUEST';
+            userAvatarEl.textContent = '?';
+        }
+        
+        // Load leaderboard immediately (works for all tabs)
+        loadLeaderboard();
+    }
         // Check if username exists in database
         async function isUsernameTaken(username) {
             try {
@@ -596,11 +599,14 @@
         }
 
         // Show name modal when character is selected
+    // MODIFIED selectChar function - only shows name modal when needed
         function selectChar(charIdx) {
             selectedChar = charIdx;
-            
+        
+            // Only show name modal if no name exists
             if (!currentUser.name) {
                 document.getElementById('nameModal').style.display = 'flex';
+                document.getElementById('playerName').focus();
             } else {
                 startGame();
             }
