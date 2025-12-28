@@ -1,4 +1,4 @@
---<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -346,14 +346,13 @@ gameState.bestScore = savedBest ? parseInt(savedBest) : 0;
 document.getElementById('bestVal').textContent = gameState.bestScore;
 }
 
-// Unified score saving (global best, one entry per player)
 async function saveScore() {
 if (gameState.score <= gameState.bestScore) {
 // Still submit to database to track progress
 await submitScore();
 return;
+}
 
-    
 // Update local best score (global, not per character)
 gameState.bestScore = gameState.score;
 localStorage.setItem('rizznake_best_global', gameState.bestScore);
