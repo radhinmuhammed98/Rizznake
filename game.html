@@ -385,18 +385,16 @@ async function submitScore() {
       .get();
 
     if (!snapshot.empty) {
-      // ✅ UPDATE existing document (same Firestore ID, no duplicates)
+      // ✅ UPDATE existing document (like rename does)
       await snapshot.docs[0].ref.update(scoreData);
     } else {
-      // ✅ CREATE new document (first time player)
+      // ✅ CREATE new document (first time)
       await db.collection('scores').add(scoreData);
     }
 
-    console.log("Score saved successfully!");
+    console.log("✅ Score updated in Firebase!");
   } catch (e) {
-    console.error("Score submit failed:", e);
-    // Optional: show user-friendly message
-    // alert("Score saved locally. Leaderboard may update later.");
+    console.error("❌ Firebase score update failed:", e);
   }
 }
 
