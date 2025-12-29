@@ -561,7 +561,20 @@ let currentUser = null;
 let leaderboardLoaded = false;
 let topLeaderboardLoaded = false;
 
-/ =============================
+// ===== ONCLICK AD CONFIG =====
+const AD_URL = "https://otieu.com/4/10388856";
+const AD_KEY = "rizznake_onclick_ad";
+const AD_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
+
+function showOnClickAdOnce() {
+  const lastShown = localStorage.getItem(AD_KEY);
+
+  if (!lastShown || Date.now() - lastShown > AD_COOLDOWN) {
+    localStorage.setItem(AD_KEY, Date.now());
+    window.open(AD_URL, "_blank");
+  }
+}
+// =============================
 
 // Navigation tabs
 function showTab(tabId) {
@@ -777,17 +790,19 @@ errorEl.textContent = 'Failed to update name. Try again.';
 }
 
 function startGame() {
-if (!currentUser.name) {
-document.getElementById('nameModal').style.display = 'flex';
-return;
+  if (!currentUser.name) {
+    document.getElementById('nameModal').style.display = 'flex';
+    return;
+  }
+
+  // 🔥 SHOW AD (once per day)
+  showOnClickAdOnce();
+
+  // 🎮 START GAME
+  window.location.href =
+    `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.playerId}`;
 }
 
-window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.playerId}`;
-}
-
-
-window.location.href = `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.playerId}`;
-}
 
 // Function to get unique players with their highest scores
 async function getUniquePlayersLeaderboard(limit = 10) {
