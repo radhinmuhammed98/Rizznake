@@ -883,7 +883,7 @@ function startGame() {
 
 
 // Function to get unique players with their highest scores
-async function getUniquePlayersLeaderboard() {
+async function getUniquePlayersLeaderboard(limit = 10) {
 try {
 // Get all scores ordered by score descending
 const snapshot = await db.collection('scores')
@@ -910,8 +910,8 @@ playerScores.set(playerId, { name, score, playerId });
 
 // Convert map to array and sort by score
 const leaderboard = Array.from(playerScores.values())
-  .sort((a, b) => b.score - a.score);
-
+  .sort((a, b) => b.score - a.score)
+  .slice(0, limit);
 
 return leaderboard;
 } catch (e) {
