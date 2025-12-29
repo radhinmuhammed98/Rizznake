@@ -333,6 +333,33 @@ justify-content: space-between;
 font-size: 12px;
 padding: 5px 0;
 }
+
+.user-rank-box {
+  background: rgba(15, 30, 15, 0.85);
+  border: 2px solid var(--glow);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 auto 15px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 12px var(--glow);
+}
+
+.user-rank-title {
+  font-size: 12px;
+  color: #aaffaa;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.user-rank-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--dash);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+     
 .full-rank {
 width: 30px;
 text-align: center;
@@ -583,6 +610,10 @@ text-decoration: underline;
 </div>
 </div>
 <div class="tab-pane" id="leaderboard-tab">
+<div class="user-rank-box hidden" id="userRankBox">
+  <div class="user-rank-title">YOUR RIZZ RANK</div>
+  <div class="user-rank-value" id="userRankValue">—</div>
+</div>
 <div class="full-leaderboard">
 <div class="full-lb-title">GLOBAL RIZZ RANKINGS</div>
 <div id="fullLeaderboardEntries" class="lb-loading">Loading full leaderboard...</div>
@@ -949,32 +980,58 @@ document.getElementById('topLeaderboardEntries').innerHTML =
 }
 
 async function loadFullLeaderboard() {
-if (leaderboardLoaded) return;
-try {
-const leaderboard = await getUniquePlayersLeaderboard(20);
-leaderboardLoaded = true;
-const entries = document.getElementById('fullLeaderboardEntries');
-if (leaderboard.length === 0) {
-entries.innerHTML = '<div class="full-lb-entry">Be the first to climb the ranks!</div>';
-return;
+  if (leaderboardLoaded) return;
+
+  try {
+    const leaderboard = await getUniquePlayersLeaderboard(1000);
+    leaderboardLoaded = true;
+
+    const entries = document.getElementById('fullLeaderboardEntries');
+    const rankBox = document.getElementById('userRankBox');
+    const rankValue = document.getElementById('userRankValue');
+
+    if (leaderboard.length === 0) {
+      entries.innerHTML = '<div class="full-lb-entry">Be the first to climb the ranks!</div>';
+      return;
+    }
+
+    let html = '';
+    let userRank = null;
+
+    leaderboard.forEach((player, idx) => {
+      const rank = idx + 1;
+
+      if (currentUser && player.playerId === currentUser.playerId) {
+        userRank = rank;
+      }
+
+      const rankClass = idx < 3 ? `full-rank-${rank}` : '';
+      html += `
+        <div class="full-lb-entry">
+          <span class="full-rank ${rankClass}">#${rank}</span>
+          <span>${player.name || 'Anonymous'} <span style="opacity:0.6;">(${player.score})</span></span>
+        </div>
+      `;
+    });
+
+    entries.innerHTML = html;
+
+    // 🎯 Show user's rank
+    if (userRank !== null) {
+      rankValue.textContent = `#${userRank} / ${leaderboard.length}`;
+      rankBox.classList.remove('hidden');
+    } else {
+      rankValue.textContent = 'NOT RANKED YET';
+      rankBox.classList.remove('hidden');
+    }
+
+  } catch (e) {
+    console.error("Full leaderboard error:", e);
+    document.getElementById('fullLeaderboardEntries').innerHTML =
+      `<div class="lb-error">Failed to load leaderboard. Please refresh.</div>`;
+  }
 }
-let html = '';
-leaderboard.forEach((player, idx) => {
-const rankClass = idx < 3 ? `full-rank-${idx + 1}` : '';
-html += `
-<div class="full-lb-entry">
-<span class="full-rank ${rankClass}">#${idx + 1}</span>
-<span>${player.name || 'Anonymous'} <span style="opacity:0.6;">(${player.score})</span></span>
-</div>
-`;
-});
-entries.innerHTML = html;
-} catch (e) {
-console.error("Full leaderboard error:", e);
-document.getElementById('fullLeaderboardEntries').innerHTML =
-`<div class="lb-error">Failed to load leaderboard. Please refresh.</div>`;
-}
-}
+
 
 // Initialize
 document.addEventListener('DOMContentLoaded', initUser);
