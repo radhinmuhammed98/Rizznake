@@ -883,7 +883,7 @@ function startGame() {
 
 
 // Function to get unique players with their highest scores
-async function getUniquePlayersLeaderboard(limit = 10) {
+async function getUniquePlayersLeaderboard() {
 try {
 // Get all scores ordered by score descending
 const snapshot = await db.collection('scores')
