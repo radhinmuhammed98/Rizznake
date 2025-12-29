@@ -67,6 +67,7 @@
 --sayip: #3d6cb5;
 --raju: #7b3fe4;
 --thoppi: #3ac498;
+--sura: #ff6f00;
 --menu-highlight: #2d402d;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -286,6 +287,8 @@ color: white;
 .char-2 .fallback { background: var(--sayip); }
 .char-3 .fallback { background: var(--raju); }
 .char-4 .fallback { background: var(--thoppi); }
+.char-5 .fallback { background: var(--sura); }
+
 .char-name {
 font-size: 15px;
 font-weight: bold;
@@ -301,6 +304,7 @@ margin: 0 auto 6px;
 .char-2 .char-name { color: var(--sayip); }
 .char-3 .char-name { color: var(--raju); }
 .char-4 .char-name { color: var(--thoppi); }
+.char-5 .char-name { color: var(--sura); }
 
 .char-desc {
 font-size: 10px;
@@ -565,8 +569,16 @@ text-decoration: underline;
     <img src="thoppi.jpg" alt="Thoppi" onerror="this.nextElementSibling.style.display='flex'">
     <div class="fallback">T</div>
   </div>
-  <div class="char-name">MRZ THOPPI</div>
+  <div class="char-name">THOPPI</div>
   <div class="char-desc"></div>
+</div>
+<div class="char-card char-5" onclick="selectChar(5)">
+  <div class="char-img">
+    <img src="sura.png" alt="Sura" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">S</div>
+  </div>
+  <div class="char-name">SURA</div>
+  <div class="char-desc">Gawd of Thrissur</div>
 </div>
 </div>
 </div>
