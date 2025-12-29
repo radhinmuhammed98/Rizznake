@@ -12,6 +12,31 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6027631171734326"
      crossorigin="anonymous"></script>
+<!-- Monetag script (load always, exactly as provided) -->
+<script>(function(s){s.dataset.zone='10388845',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<!-- Ad container -->
+<div id="monetag-container"></div>
+
+<script>
+(function() {
+  const AD_INTERVAL = 10 * 60 * 1000; // 10 minutes
+  const LAST_AD_KEY = "monetag_last_ad_time";
+  const now = Date.now();
+  const lastTime = localStorage.getItem(LAST_AD_KEY);
+
+  const adContainer = document.getElementById("monetag-container");
+  if (!adContainer) return;
+
+  if (!lastTime || now - lastTime > AD_INTERVAL) {
+    localStorage.setItem(LAST_AD_KEY, now);
+    adContainer.style.display = "block"; // show ad
+  } else {
+    adContainer.style.display = "none"; // hide ad
+  }
+})();
+</script>
+
 <style>
 :root {
 --bg: #0c140c;
