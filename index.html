@@ -910,8 +910,8 @@ playerScores.set(playerId, { name, score, playerId });
 
 // Convert map to array and sort by score
 const leaderboard = Array.from(playerScores.values())
-.sort((a, b) => b.score - a.score)
-.slice(0, limit);
+  .sort((a, b) => b.score - a.score);
+
 
 return leaderboard;
 } catch (e) {
