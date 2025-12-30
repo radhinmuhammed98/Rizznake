@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-adsense-account" content="ca-pub-6027631171734326">
+<meta charset="utf-8">
+<title>Rizznake — Retro Snake with Rizz</title>
+<meta name="description" content="A modern retro twist on Snake. Choose your persona, chase glory, and dominate the leaderboard.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="author" content="Radhin">
+<!-- Open Graph (for Facebook, Discord, etc.) -->
+<meta property="og:title" content="Rizznake — Retro Snake with Rizz">
+<meta property="og:description" content="Choose your rizz. Conquer the grid. Claim your spot on the global leaderboard.">
+<meta property="og:image" content="/shared/banner.png">
+<meta property="og:url" content="https://mallusnake.tech">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rizznake — Retro Snake with Rizz">
+<meta name="twitter:description" content="Choose your rizz. Conquer the grid. Claim your spot on the global leaderboard.">
+<meta name="twitter:image" content="https://mallusnake.tech/shared/banner.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6027631171734326"
+     crossorigin="anonymous"></script>
+<!-- Ad container -->
+<div id="monetag-container"></div>
+<script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
+<script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+
+<script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+<script>
+    window.ezstandalone = window.ezstandalone || {};
+    ezstandalone.cmd = ezstandalone.cmd || [];
+</script>
+     
+<script>
+(function() {
+  const AD_INTERVAL = 10 * 60 * 1000; // 10 minutes
+  const LAST_AD_KEY = "monetag_last_ad_time";
+  const now = Date.now();
+  const lastTime = localStorage.getItem(LAST_AD_KEY);
+
+  const adContainer = document.getElementById("monetag-container");
+  if (!adContainer) return;
+
+  if (!lastTime || now - lastTime > AD_INTERVAL) {
+    localStorage.setItem(LAST_AD_KEY, now);
+    adContainer.style.display = "block"; // show ad
+  } else {
+    adContainer.style.display = "none"; // hide ad
+  }
+})();
+</script>
+
+<style>
+:root {
+--bg: #0c140c;
+--panel: #162316;
+--text: #c0f0c0;
+--border: #253325;
+--glow: rgba(0, 200, 0, 0.5);
+--dash: #e5c53d;
+--vasu: #a83636;
+--sayip: #3d6cb5;
+--raju: #7b3fe4;
+--thoppi: #3ac498;
+--sura: #ff6f00;
+--menu-highlight: #2d402d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+background: var(--bg);
+color: var(--text);
+font-family: 'Press Start 2P', monospace;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 15px;
+position: relative;
+overflow-x: hidden;
+/* CRT Scanlines */
+background-image:
+linear-gradient(rgba(0, 30, 0, 0.15) 50%, transparent 50%),
+linear-gradient(90deg, rgba(0, 30, 0, 0.15) 50%, transparent 50%);
+background-size: 4px 4px;
+}
+/* Top user display panel */
+.user-panel {
+display: flex;
+justify-content: space-between;
+align-items: center;
+width: 100%;
+max-width: 600px;
+padding: 10px 15px;
+background: rgba(10, 20, 10, 0.7);
+border: 2px solid var(--border);
+border-radius: 6px;
+margin-bottom: 15px;
+}
+.user-info {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.user-avatar {
+width: 30px;
+height: 30px;
+border-radius: 50%;
+background: var(--glow);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 14px;
+font-weight: bold;
+color: #000;
+}
+.user-name {
+font-size: 14px;
+font-weight: bold;
+color: #aaffaa;
+max-width: 150px;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.logout-btn {
+background: none;
+border: 1px solid var(--border);
+color: var(--text);
+padding: 3px 8px;
+font-family: inherit;
+font-size: 10px;
+cursor: pointer;
+border-radius: 3px;
+}
+.logout-btn:hover {
+background: var(--border);
+}
+.header {
+text-align: center;
+margin: 10px 0 15px;
+width: 100%;
+}
+.logo {
+font-size: 45px;
+text-shadow: 0 0 10px var(--glow), 2px 2px 0 var(--border);
+margin-bottom: 8px;
+letter-spacing: -1px;
+font-family: 'Silkscreen', sans-serif;
+font-weight: 500;
+}
+.subtitle {
+  font-size: 12px;
+  opacity: 0.75;
+  max-width: 420px;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Top 3 Leaderboard Section */
+.top-leaderboard {
+background: rgba(10, 20, 10, 0.7);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 15px;
+width: 100%;
+max-width: 500px;
+margin-bottom: 20px;
+}
+.top-lb-title {
+text-align: center;
+font-size: 16px;
+margin-bottom: 12px;
+color: #aaffaa;
+text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
+}
+.top-lb-entry {
+display: flex;
+justify-content: space-between;
+font-size: 14px;
+padding: 8px 0;
+border-bottom: 1px dashed var(--border);
+}
+.top-lb-entry:last-child {
+border-bottom: none;
+}
+.top-rank {
+width: 30px;
+text-align: center;
+font-weight: bold;
+font-size: 16px;
+}
+.top-rank-1 { color: gold; }
+.top-rank-2 { color: silver; }
+.top-rank-3 { color: #cd7f32; }
+/* Navigation Tabs - Retro Style */
+.nav-tabs {
+display: flex;
+gap: 2px;
+width: 100%;
+max-width: 600px;
+margin-bottom: 20px;
+border-bottom: 2px solid var(--border);
+}
+.nav-tab {
+background: rgba(20, 35, 20, 0.6);
+border: 1px solid var(--border);
+border-bottom: none;
+padding: 8px 12px;
+cursor: pointer;
+font-size: 12px;
+flex: 1;
+text-align: center;
+transition: all 0.2s;
+}
+.nav-tab:hover {
+background: rgba(30, 45, 30, 0.8);
+}
+.nav-tab.active {
+background: var(--panel);
+border-top: 2px solid var(--glow);
+border-left: 1px solid var(--glow);
+border-right: 1px solid var(--glow);
+font-weight: bold;
+}
+.tab-content {
+width: 100%;
+max-width: 600px;
+margin-bottom: 20px;
+}
+.tab-pane {
+display: none;
+}
+.tab-pane.active {
+display: block;
+}
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+gap: 20px;
+width: 100%;
+max-width: 500px;
+margin: 0 auto 30px;
+}
+.char-card {
+background: var(--panel);
+border: 2px solid var(--border);
+border-radius: 8px;
+padding: 16px 10px;
+text-align: center;
+cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s;
+box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+.char-card:hover {
+transform: translateY(-4px);
+box-shadow: 0 6px 12px rgba(0,0,0,0.5), 0 0 8px var(--glow);
+}
+.char-img {
+width: 80px;
+height: 80px;
+margin: 0 auto 10px;
+border-radius: 50%;
+overflow: hidden;
+border: 2px solid var(--border);
+position: relative;
+}
+.char-img img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+display: block;
+}
+.char-img .fallback {
+display: none;
+align-items: center;
+justify-content: center;
+width: 100%;
+height: 100%;
+font-size: 28px;
+font-weight: bold;
+color: white;
+}
+.char-0 .fallback { background: var(--dash); }
+.char-1 .fallback { background: var(--vasu); }
+.char-2 .fallback { background: var(--sayip); }
+.char-3 .fallback { background: var(--raju); }
+.char-4 .fallback { background: var(--thoppi); }
+.char-5 .fallback { background: var(--sura); }
+
+.char-name {
+font-size: 15px;
+font-weight: bold;
+margin: 6px 0;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+max-width: 130px;
+margin: 0 auto 6px;
+}
+.char-0 .char-name { color: var(--dash); }
+.char-1 .char-name { color: var(--vasu); }
+.char-2 .char-name { color: var(--sayip); }
+.char-3 .char-name { color: var(--raju); }
+.char-4 .char-name { color: var(--thoppi); }
+.char-5 .char-name { color: var(--sura); }
+
+.char-desc {
+font-size: 10px;
+opacity: 0.7;
+margin-top: 3px;
+}
+.full-leaderboard {
+background: rgba(10, 20, 10, 0.7);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 15px;
+width: 100%;
+max-width: 500px;
+margin: 0 auto;
+}
+.full-lb-title {
+text-align: center;
+font-size: 14px;
+margin-bottom: 12px;
+color: #aaffaa;
+text-shadow: 0 0 6px rgba(170, 255, 170, 0.6);
+}
+.full-lb-entry {
+display: flex;
+justify-content: space-between;
+font-size: 12px;
+padding: 5px 0;
+}
+
+.user-rank-box {
+  background: rgba(15, 30, 15, 0.85);
+  border: 2px solid var(--glow);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 auto 15px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 12px var(--glow);
+}
+
+.user-rank-title {
+  font-size: 12px;
+  color: #aaffaa;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.user-rank-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--dash);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+     
+.full-rank {
+width: 30px;
+text-align: center;
+font-weight: bold;
+}
+.full-rank-1 { color: gold; }
+.full-rank-2 { color: silver; }
+.full-rank-3 { color: #cd7f32; }
+/* About/Help content styling */
+.info-section {
+background: rgba(10, 20, 10, 0.7);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 15px;
+line-height: 1.5;
+font-size: 12px;
+}
+.info-section h3 {
+margin-bottom: 10px;
+color: #aaffaa;
+font-size: 16px;
+}
+.info-section p {
+margin-bottom: 8px;
+}
+.info-section ul {
+margin-left: 20px;
+margin-bottom: 10px;
+}
+.info-section li {
+margin-bottom: 5px;
+}
+.watermark {
+position: absolute;
+bottom: 0px;
+left: 50%;
+transform: translateX(-50%);
+font-size: 8px;
+opacity: 0.5;
+}
+.version {
+position: absolute;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%);
+font-size: 9px;
+opacity: 0.4;
+}
+/* Name Modal */
+#nameModal, #changeNameModal {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.85);
+display: none;
+align-items: center; justify-content: center;
+z-index: 100;
+font-family: 'Press Start 2P', monospace;
+}
+.modal-content {
+background: var(--panel);
+padding: 25px;
+border: 2px solid var(--border);
+text-align: center;
+max-width: 320px;
+width: 90%;
+box-shadow: 0 0 15px var(--glow);
+}
+.modal-content h3 {
+margin-bottom: 15px;
+color: #aaffaa;
+}
+.modal-content input {
+width: 100%; padding: 10px; margin: 15px 0;
+background: #0a120a; border: 1px solid var(--border);
+color: var(--text); font-family: inherit; font-size: 14px;
+text-align: center;
+}
+.modal-btns {
+display: flex;
+gap: 10px;
+margin-top: 15px;
+justify-content: center;
+}
+.modal-btn {
+background: var(--border);
+color: var(--text);
+border: none;
+padding: 8px 15px;
+font-family: inherit;
+font-size: 12px;
+cursor: pointer;
+transition: background 0.2s;
+}
+.modal-btn:hover {
+background: #3a503a;
+}
+.modal-btn.secondary {
+background: rgba(0,0,0,0.3);
+}
+.name-error {
+color: var(--vasu);
+font-size: 11px;
+margin-top: 5px;
+min-height: 16px;
+}
+/* Loading & Error states */
+.lb-loading {
+text-align: center;
+padding: 20px;
+font-size: 12px;
+opacity: 0.7;
+}
+.lb-error {
+color: var(--vasu);
+text-align: center;
+padding: 15px;
+font-size: 12px;
+}
+.hidden { display: none !important; }
+.footer-links {
+display: flex;
+justify-content: center;
+gap: 15px;
+margin-top: 20px;
+font-size: 10px;
+}
+.footer-links a {
+color: var(--text);
+text-decoration: none;
+opacity: 0.7;
+transition: opacity 0.2s;
+}
+.footer-links a:hover {
+opacity: 1;
+text-decoration: underline;
+}
+/* Responsive adjustments */
+@media (max-width: 480px) {
+.user-panel { flex-direction: column; gap: 10px; }
+.nav-tabs { flex-wrap: wrap; }
+.nav-tab { flex-basis: 33.33%; margin-bottom: 2px; }
+.top-leaderboard, .grid { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<!-- Name Modal (shown after character select) -->
+<div id="nameModal">
+<div class="modal-content">
+<h3>CHOOSE YOUR RIZZ NAME</h3>
+<p style="font-size:10px;opacity:0.7;margin:10px 0;">3-12 letters/numbers. Must be unique.</p>
+<input type="text" id="playerName" maxlength="12" placeholder="Enter unique name" autofocus>
+<div class="name-error" id="nameError"></div>
+<div class="modal-btns">
+<button class="modal-btn secondary" onclick="document.getElementById('nameModal').style.display='none'">CANCEL</button>
+<button class="modal-btn" onclick="confirmName()">CONFIRM</button>
+</div>
+</div>
+</div>
+<!-- Change Name Modal -->
+<div id="changeNameModal">
+<div class="modal-content">
+<h3>CHANGE YOUR NAME</h3>
+<p style="font-size:10px;opacity:0.7;margin:10px 0;">Your stats will be preserved</p>
+<input type="text" id="newPlayerName" maxlength="12" placeholder="New name">
+<div class="name-error" id="changeNameError"></div>
+<div class="modal-btns">
+<button class="modal-btn secondary" onclick="document.getElementById('changeNameModal').style.display='none'">CANCEL</button>
+<button class="modal-btn" onclick="changeName()">UPDATE</button>
+</div>
+</div>
+</div>
+<!-- Top User Panel -->
+<div class="user-panel">
+<div class="user-info">
+<div class="user-avatar" id="userAvatar">?</div>
+<div class="user-name" id="displayName">GUEST</div>
+</div>
+<button class="logout-btn" onclick="changeNamePrompt()">CHANGE NAME</button>
+</div>
+<div class="header">
+<h1 class="logo">RIZZNAKE</h1>
+<p class="subtitle">Choose your rizz. Conquer the grid. Claim your spot on the global leaderboard.</p>
+</div>
+<!-- Top 3 Leaderboard -->
+<div class="top-leaderboard">
+<div class="top-lb-title">TOP RIZZ PLAYERS</div>
+<div id="topLeaderboardEntries" class="lb-loading">Loading top players...</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="nav-tabs">
+<div class="nav-tab active" data-tab="play">PLAY</div>
+<div class="nav-tab" data-tab="leaderboard">LEADERBOARD</div>
+<div class="nav-tab" data-tab="about">ABOUT</div>
+<div class="nav-tab" data-tab="help">HELP</div>
+</div>
+<!-- Tab Content -->
+<div class="tab-content">
+<div class="tab-pane active" id="play-tab">
+<div class="grid">
+<div class="char-card char-0" onclick="selectChar(0)">
+<div class="char-img">
+<img src="dashamoolam.jpg" alt="Dashamoolam" onerror="this.nextElementSibling.style.display='flex'">
+<div class="fallback">D</div>
+</div>
+<div class="char-name">DASHAMOOLAM</div>
+<div class="char-desc"></div>
+</div>
+<div class="char-card char-1" onclick="selectChar(1)">
+<div class="char-img">
+<img src="vasu.jpg" alt="Vasu" onerror="this.nextElementSibling.style.display='flex'">
+<div class="fallback">V</div>
+</div>
+<div class="char-name">VASU</div>
+<div class="char-desc"></div>
+</div>
+<div class="char-card char-2" onclick="selectChar(2)">
+<div class="char-img">
+<img src="sayip.jpg" alt="Sayip" onerror="this.nextElementSibling.style.display='flex'">
+<div class="fallback">S</div>
+</div>
+<div class="char-name">SAYIP</div>
+<div class="char-desc"></div>
+</div>
+<div class="char-card char-3" onclick="selectChar(3)">
+  <div class="char-img">
+    <img src="raju.jpg" alt="Raju" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">T</div>
+  </div>
+  <div class="char-name">RAJU</div>
+  <div class="char-desc"></div>
+</div>
+<div class="char-card char-4" onclick="selectChar(4)">
+  <div class="char-img">
+    <img src="thoppi.jpg" alt="Thoppi" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">T</div>
+  </div>
+  <div class="char-name">THOPPI</div>
+  <div class="char-desc"></div>
+</div>
+<div class="char-card char-5" onclick="selectChar(5)">
+  <div class="char-img">
+    <img src="sura.png" alt="Sura" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">S</div>
+  </div>
+  <div class="char-name">SURA</div>
+  <div class="char-desc">Gawd of Thrissur</div>
+</div>
+</div>
+</div>
+<div class="tab-pane" id="leaderboard-tab">
+<div class="user-rank-box hidden" id="userRankBox">
+  <div class="user-rank-title">YOUR RIZZ RANK</div>
+  <div class="user-rank-value" id="userRankValue">—</div>
+</div>
+<div class="full-leaderboard">
+<div class="full-lb-title">GLOBAL RIZZ RANKINGS</div>
+<div id="fullLeaderboardEntries" class="lb-loading">Loading full leaderboard...</div>
+</div>
+</div>
+<div class="tab-pane" id="about-tab">
+<div class="info-section">
+<h3>ABOUT RIZZNAKE</h3>
+<p>Rizznake is a modern retro twist on the classic Snake game, featuring unique character personalities and a global leaderboard.</p>
+<p>Created with love by Radhin, this game combines nostalgic 90s aesthetics with modern web technologies.</p>
+<p>Version 1.5 • © 2025 Radhin Inc.</p>
+<h3 style="margin-top: 15px;">PRIVACY POLICY</h3>
+<p>We only store your chosen username and game scores. No personal information is collected. All data is used solely for the leaderboard functionality.</p>
+</div>
+</div>
+<div class="tab-pane" id="help-tab">
+<div class="info-section">
+<h3>HOW TO PLAY</h3>
+<p>Guide your snake to eat food while avoiding walls and your own tail.</p>
+<ul>
+<li><strong>Desktop:</strong> Use arrow keys to control the snake</li>
+<li><strong>Mobile:</strong> Swipe in the direction you want to go</li>
+<li><strong>Scoring:</strong> Each food item is worth 10 points</li>
+<li><strong>Characters:</strong> Each has unique sound effects and visual style</li>
+</ul>
+<p>Pro tip: Longer snakes are harder to control. Plan your moves ahead!</p>
+<h3 style="margin-top: 15px;">SUPPORT</h3>
+<p>Having issues? Contact us at support@rizznake.game with details of the problem.</p>
+</div>
+</div>
+</div>
+<div class="footer-links">
+<a href="/privacy.html" target="_blank">Privacy Policy</a>
+<a href="#" onclick="showTab('help')">Help & Support</a>
+<a href="https://www.instagram.com/radhin.inc/" target="_blank">Developer</a>
+</div>
+<div class="watermark">Rizznake © Radhin • 2025</div>
+<div class="version">v1.5.0</div>
+<script>
+// Firebase Config
+const firebaseConfig = {
+apiKey: "AIzaSyCaa9IHlcKGdUEZjf0BpdBEFUB8KoppVP0",
+authDomain: "rizznake-2cc02.firebaseapp.com",
+projectId: "rizznake-2cc02",
+storageBucket: "rizznake-2cc02.firebasestorage.app",
+messagingSenderId: "176358385186",
+appId: "1:176358385186:web:68c6c662895eb512034c7b"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let selectedChar = null;
+let currentUser = null;
+let leaderboardLoaded = false;
+let topLeaderboardLoaded = false;
+
+// ===== ONCLICK AD CONFIG =====
+const AD_URL = "https://otieu.com/4/10388856";
+const AD_KEY = "rizznake_onclick_ad";
+const AD_COOLDOWN = 10 * 60 * 1000; // 10 minutes
+
+function showOnClickAdOnce() {
+  const lastShown = localStorage.getItem(AD_KEY);
+
+  if (!lastShown || Date.now() - lastShown > AD_COOLDOWN) {
+    localStorage.setItem(AD_KEY, Date.now());
+    window.open(AD_URL, "_blank");
+  }
+}
+// =============================
+
+// Navigation tabs
+function showTab(tabId) {
+// Update active tab
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+// Show corresponding content
+document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
+document.getElementById(`${tabId}-tab`).classList.add('active');
+// Load full leaderboard if needed
+if (tabId === 'leaderboard' && !leaderboardLoaded) {
+loadFullLeaderboard();
+}
+}
+document.querySelectorAll('.nav-tab').forEach(tab => {
+tab.addEventListener('click', () => {
+const tabId = tab.getAttribute('data-tab');
+showTab(tabId);
+});
+});
+
+// Generate or retrieve player ID and name
+function initUser() {
+let playerId = localStorage.getItem('rizz_player_id');
+let playerName = localStorage.getItem('rizz_player_name');
+
+if (!playerId) {
+// Generate unique anonymous ID
+playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+localStorage.setItem('rizz_player_id', playerId);
+}
+
+currentUser = { playerId: playerId, name: playerName || null };
+
+// Always show GUEST until name is entered
+document.getElementById('displayName').textContent = playerName || 'GUEST';
+document.getElementById('userAvatar').textContent = playerName ? playerName.charAt(0).toUpperCase() : '?';
+
+// Load top leaderboard on init
+loadTopLeaderboard();
+
+// Force fresh leaderboard load if user just came back from game
+if (performance.navigation && performance.navigation.type === 2) {
+  // User navigated back
+  topLeaderboardLoaded = false;
+  leaderboardLoaded = false;
+  loadTopLeaderboard();
+  
+  // Also refresh full leaderboard if user is on that tab
+  if (document.querySelector('.nav-tab[data-tab="leaderboard"]').classList.contains('active')) {
+    loadFullLeaderboard();
+  }
+}
+
+  if (window.performance.getEntriesByType('navigation')[0]?.type === 'back_forward') {
+  // refresh logic here
+}
+}
+
+// Check if username exists in database
+async function isUsernameTaken(username) {
+  try {
+    const query = db.collection('scores').where('name', '==', username);
+    
+    // Only exclude current user if we have a valid playerId
+    if (currentUser && currentUser.playerId) {
+      query.where('playerId', '!=', currentUser.playerId);
+    }
+    
+    const snapshot = await query.limit(1).get();
+    return !snapshot.empty;
+  } catch (e) {
+    console.error("Username check error:", e);
+    return false;
+  }
+}
+
+// Show name modal when character is selected
+function selectChar(charIdx) {
+selectedChar = charIdx;
+
+// Only show name modal if no name exists
+if (!currentUser.name) {
+document.getElementById('nameModal').style.display = 'flex';
+document.getElementById('playerName').focus();
+} else {
+startGame();
+}
+}
+
+function confirmName() {
+const input = document.getElementById('playerName');
+let name = input.value.trim();
+const errorEl = document.getElementById('nameError');
+
+errorEl.textContent = '';
+
+if (name.length < 3 || name.length > 12) {
+errorEl.textContent = 'Name must be 3-12 characters';
+return;
+}
+
+// Allow only letters, numbers, and spaces
+name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+if (name.length < 3) {
+errorEl.textContent = 'Use only letters and numbers';
+return;
+}
+
+// Check if name is unique
+isUsernameTaken(name).then(isTaken => {
+if (isTaken) {
+errorEl.textContent = 'Name already taken! Try another.';
+return;
+}
+
+// Save name to localStorage
+localStorage.setItem('rizz_player_name', name);
+currentUser.name = name;
+
+document.getElementById('displayName').textContent = name;
+document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+// Close modal and start game
+document.getElementById('nameModal').style.display = 'none';
+startGame();
+});
+}
+
+function changeNamePrompt() {
+if (!currentUser.name) {
+document.getElementById('nameModal').style.display = 'flex';
+return;
+}
+
+document.getElementById('changeNameModal').style.display = 'flex';
+document.getElementById('newPlayerName').value = currentUser.name || '';
+}
+
+async function changeName() {
+const input = document.getElementById('newPlayerName');
+let name = input.value.trim();
+const errorEl = document.getElementById('changeNameError');
+
+errorEl.textContent = '';
+
+if (name.length < 3 || name.length > 12) {
+errorEl.textContent = 'Name must be 3-12 characters';
+return;
+}
+
+// Allow only letters, numbers, and spaces
+name = name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+if (name.length < 3) {
+errorEl.textContent = 'Use only letters and numbers';
+return;
+}
+
+// Check if name is unique
+isUsernameTaken(name).then(async (isTaken) => {
+if (isTaken) {
+errorEl.textContent = 'Name already taken! Try another.';
+return;
+}
+
+try {
+// Update the name in all scores with this player ID
+const userScores = await db.collection('scores')
+.where('playerId', '==', currentUser.playerId)
+.get();
+
+if (userScores.empty) {
+// No scores to update, just change name
+localStorage.setItem('rizz_player_name', name);
+currentUser.name = name;
+document.getElementById('displayName').textContent = name;
+document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+document.getElementById('changeNameModal').style.display = 'none';
+loadTopLeaderboard(); // Refresh top leaderboard
+if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+loadFullLeaderboard();
+}
+return;
+}
+
+const batch = db.batch();
+userScores.docs.forEach(doc => {
+batch.update(doc.ref, { name: name });
+});
+
+await batch.commit();
+
+// Save name to localStorage
+localStorage.setItem('rizz_player_name', name);
+currentUser.name = name;
+
+document.getElementById('displayName').textContent = name;
+document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+// Close modal
+document.getElementById('changeNameModal').style.display = 'none';
+
+// Reload leaderboards
+loadTopLeaderboard();
+if (document.querySelector('.nav-tab.active').getAttribute('data-tab') === 'leaderboard') {
+loadFullLeaderboard();
+}
+} catch (e) {
+console.error("Error updating name:", e);
+errorEl.textContent = 'Failed to update name. Try again.';
+}
+});
+}
+
+function startGame() {
+  if (!currentUser.name) {
+    document.getElementById('nameModal').style.display = 'flex';
+    return;
+  }
+
+  // 🔥 SHOW AD (once per day)
+  showOnClickAdOnce();
+
+  // 🎮 START GAME
+  window.location.href =
+    `game.html?char=${selectedChar}&name=${encodeURIComponent(currentUser.name)}&id=${currentUser.playerId}`;
+}
+
+
+// Function to get unique players with their highest scores
+async function getUniquePlayersLeaderboard(limit = 10) {
+try {
+// Get all scores ordered by score descending
+const snapshot = await db.collection('scores')
+.orderBy('score', 'desc')
+.get();
+
+if (snapshot.empty) {
+return [];
+}
+
+// Create a map to store highest score for each player
+const playerScores = new Map();
+snapshot.docs.forEach(doc => {
+const data = doc.data();
+const playerId = data.playerId;
+const score = data.score;
+const name = data.name || 'Anonymous';
+
+// If we haven't seen this player or this score is higher than previous
+if (!playerScores.has(playerId) || score > playerScores.get(playerId).score) {
+playerScores.set(playerId, { name, score, playerId });
+}
+});
+
+// Convert map to array and sort by score
+const leaderboard = Array.from(playerScores.values())
+  .sort((a, b) => b.score - a.score)
+  .slice(0, limit);
+
+return leaderboard;
+} catch (e) {
+console.error("Error getting unique leaderboard:", e);
+return [];
+}
+}
+
+async function loadTopLeaderboard() {
+if (topLeaderboardLoaded) return;
+try {
+const leaderboard = await getUniquePlayersLeaderboard(3);
+topLeaderboardLoaded = true;
+const entries = document.getElementById('topLeaderboardEntries');
+if (leaderboard.length === 0) {
+entries.innerHTML = '<div class="lb-entry">Be the first to climb the ranks!</div>';
+return;
+}
+let html = '';
+leaderboard.forEach((player, idx) => {
+const rankClass = `top-rank-${idx + 1}`;
+html += `
+<div class="top-lb-entry">
+<span class="top-rank ${rankClass}">#${idx + 1}</span>
+<span>${player.name || 'Anonymous'} <span style="opacity:0.6;">(${player.score})</span></span>
+</div>
+`;
+});
+entries.innerHTML = html;
+} catch (e) {
+console.error("Top leaderboard error:", e);
+document.getElementById('topLeaderboardEntries').innerHTML =
+`<div class="lb-error">Failed to load top players. Please refresh.</div>`;
+}
+}
+
+async function loadFullLeaderboard() {
+  if (leaderboardLoaded) return;
+
+  try {
+    const leaderboard = await getUniquePlayersLeaderboard(1000);
+    leaderboardLoaded = true;
+
+    const entries = document.getElementById('fullLeaderboardEntries');
+    const rankBox = document.getElementById('userRankBox');
+    const rankValue = document.getElementById('userRankValue');
+
+    if (leaderboard.length === 0) {
+      entries.innerHTML = '<div class="full-lb-entry">Be the first to climb the ranks!</div>';
+      return;
+    }
+
+    let html = '';
+    let userRank = null;
+
+    leaderboard.forEach((player, idx) => {
+      const rank = idx + 1;
+
+      if (currentUser && player.playerId === currentUser.playerId) {
+        userRank = rank;
+      }
+
+      const rankClass = idx < 3 ? `full-rank-${rank}` : '';
+      html += `
+        <div class="full-lb-entry">
+          <span class="full-rank ${rankClass}">#${rank}</span>
+          <span>${player.name || 'Anonymous'} <span style="opacity:0.6;">(${player.score})</span></span>
+        </div>
+      `;
+    });
+
+    entries.innerHTML = html;
+
+    // 🎯 Show user's rank
+    if (userRank !== null) {
+      rankValue.textContent = `#${userRank} / ${leaderboard.length}`;
+      rankBox.classList.remove('hidden');
+    } else {
+      rankValue.textContent = 'NOT RANKED YET';
+      rankBox.classList.remove('hidden');
+    }
+
+  } catch (e) {
+    console.error("Full leaderboard error:", e);
+    document.getElementById('fullLeaderboardEntries').innerHTML =
+      `<div class="lb-error">Failed to load leaderboard. Please refresh.</div>`;
+  }
+}
+
+
+// Initialize
+document.addEventListener('DOMContentLoaded', initUser);
+</script>
+</body>
+</html>
