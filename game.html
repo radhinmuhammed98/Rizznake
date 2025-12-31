@@ -199,6 +199,11 @@ margin: 8px 0;
 text-align: center;
 text-shadow: 0 0 4px var(--glow);
 }
+/* Make snake head transparent so image is visible */
+.cell.snake.head {
+  background: transparent !important;
+     }
+     
 </style>
 </head>
 <body>
@@ -597,6 +602,18 @@ img.style.height = '100%';
 img.style.objectFit = 'cover';
 img.style.display = 'block';
 
+// Rotate head image based on snake direction
+let rotation = 0;
+
+if (gameState.dir.x === 1) rotation = 0;        // right
+else if (gameState.dir.y === 1) rotation = 90;  // down
+else if (gameState.dir.x === -1) rotation = 180;// left
+else if (gameState.dir.y === -1) rotation = -90;// up
+
+img.style.transform = `rotate(${rotation}deg)`;
+img.style.transformOrigin = 'center center';
+img.style.transition = 'transform 0.08s linear';
+     
 img.onerror = function() {
 this.style.display = 'none';
 headCell.style.backgroundColor = characters[gameState.charIdx].color === 'char-0' ? '#e5c53d' :
