@@ -73,6 +73,7 @@
 --raju: #7b3fe4;
 --thoppi: #3ac498;
 --sura: #ff6f00;
+--njettikkal: #f06f00;
 --menu-highlight: #2d402d;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -296,7 +297,8 @@ color: white;
 .char-3 .fallback { background: var(--raju); }
 .char-4 .fallback { background: var(--thoppi); }
 .char-5 .fallback { background: var(--sura); }
-
+.char-6 .fallback { background: var(--njettikkal); }
+     
 .char-name {
 font-size: 15px;
 font-weight: bold;
@@ -313,6 +315,7 @@ margin: 0 auto 6px;
 .char-3 .char-name { color: var(--raju); }
 .char-4 .char-name { color: var(--thoppi); }
 .char-5 .char-name { color: var(--sura); }
+.char-6 .char-name { color: var(--njettikkal); }
 
 .char-desc {
 font-size: 10px;
@@ -614,6 +617,14 @@ text-decoration: underline;
   </div>
   <div class="char-name">SURA</div>
   <div class="char-desc">Gawd of Thrissur</div>
+</div>
+<div class="char-card char-6" onclick="selectChar(6)">
+  <div class="char-img">
+    <img src="biriyani.png" alt="Njettikkal" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">N</div>
+  </div>
+  <div class="char-name">NJETTIKKAL</div>
+  <div class="char-desc">NEW</div>
 </div>
 </div>
 </div>
