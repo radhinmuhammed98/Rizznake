@@ -20,6 +20,9 @@
 --snake-head-dash: #e5c53d;
 --snake-head-vasu: #a83636;
 --snake-head-sayip: #3d6cb5;
+--snake-head-thoppi: #396cb5;
+--snake-head-sura: #3d68b5;
+--snake-head-njettikkal: #3d6c55;
 --food-color: #aaffaa;
 --text-color: #c0f0c0;
 --border-color: #253325;
@@ -343,6 +346,13 @@ const characters = [
   image: "sura-head.png",
   eatSound: "eat-sura.mp3",
   dieSound: "die-sura.mp3"
+ },
+  {
+  name: "Njettikkal",
+  color: "char-6",
+  image: "biriyani.png",
+  eatSound: "ghost.mp3",
+  dieSound: ""
  },
 ];
 
@@ -680,7 +690,7 @@ function endGame() {
   saveScore();
 
   // Trigger jumpscare for Thoppi only
-  if (characters[gameState.charIdx].name === "Thoppi") {
+  if (characters[gameState.charIdx].name === "Njettikkal") {
     triggerNjettikkal();
 
     // Delay game over UI slightly
