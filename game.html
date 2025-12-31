@@ -602,13 +602,13 @@ img.style.height = '100%';
 img.style.objectFit = 'cover';
 img.style.display = 'block';
 
-// Rotate head image based on snake direction
 let rotation = 0;
 
-if (gameState.dir.x === 1) rotation = 90;        // right
-else if (gameState.dir.y === 1) rotation = 90;  // down
-else if (gameState.dir.x === -1) rotation = 180;// left
-else if (gameState.dir.y === -1) rotation = -90;// up
+// Image default direction = UP
+if (gameState.dir.x === 0 && gameState.dir.y === -1) rotation = 0;    // UP
+else if (gameState.dir.x === 1 && gameState.dir.y === 0) rotation = 90;  // RIGHT
+else if (gameState.dir.x === 0 && gameState.dir.y === 1) rotation = 180; // DOWN
+else if (gameState.dir.x === -1 && gameState.dir.y === 0) rotation = -90;// LEFT
 
 img.style.transform = `rotate(${rotation}deg)`;
 img.style.transformOrigin = 'center center';
