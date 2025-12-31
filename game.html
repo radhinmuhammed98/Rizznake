@@ -203,6 +203,41 @@ text-shadow: 0 0 4px var(--glow);
 .cell.snake.head {
   background: transparent !important;
      }
+
+/* NJETTIKKAL JUMPSCARE (SMALL VERSION) */
+#njettikkal{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(60vw, 380px); /* SMALLER */
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Triggered state */
+body.njettikkal-attack #njettikkal{
+  opacity: 1;
+  animation:
+    njettikkalPop 0.18s cubic-bezier(.2,.9,.1,1) forwards,
+    njettikkalShake 0.15s ease-in-out 0.18s;
+}
+
+@keyframes njettikkalPop{
+  0% { transform: translate(-50%, -50%) scale(0.2); }
+  80% { transform: translate(-50%, -50%) scale(1.05); }
+  100% { transform: translate(-50%, -50%) scale(0.95); }
+}
+
+@keyframes njettikkalShake{
+  0% { transform: translate(-50%, -50%) scale(0.95) translateX(0); }
+  25% { transform: translate(-50%, -50%) scale(0.95) translateX(-6px); }
+  50% { transform: translate(-50%, -50%) scale(0.95) translateX(6px); }
+  75% { transform: translate(-50%, -50%) scale(0.95) translateX(-3px); }
+  100% { transform: translate(-50%, -50%) scale(0.95) translateX(0); }
+}
+
      
 </style>
 </head>
@@ -236,6 +271,18 @@ Your score: <span id="finalScore">0</span>
 Use Arrow Keys or Swipe to Control the Snake
 </div>
 <div class="watermark">Rizznake © Radhin</div>
+
+     
+<!-- NJETTIKKAL JUMPSCARE -->
+<img
+  id="njettikkal"
+  src="biriyani.png"
+  alt="Njettikkal Biriyani"
+/>
+
+<audio id="njettikkalSound" src="ghost.mp3" preload="auto"></audio>
+     
+     
 <script>
 // Firebase
 const firebaseConfig = {
@@ -625,18 +672,28 @@ headCell.appendChild(img);
 }
 
 function endGame() {
-gameState.running = false;
-playDie();
+  gameState.running = false;
+  playDie();
 
-// Show final score
-document.getElementById('finalScore').textContent = gameState.score;
+  // Show score immediately
+  document.getElementById('finalScore').textContent = gameState.score;
+  saveScore();
 
-// Save score (unified system)
-saveScore();
+  // Trigger jumpscare for Thoppi only
+  if (characters[gameState.charIdx].name === "Thoppi") {
+    triggerNjettikkal();
 
-// Show game over screen
-document.getElementById('game-overlay').classList.remove('hidden');
+    // Delay game over UI slightly
+    setTimeout(() => {
+      document.getElementById('game-overlay').classList.remove('hidden');
+    }, 550);
+
+  } else {
+    // Normal characters → instant game over screen
+    document.getElementById('game-overlay').classList.remove('hidden');
+  }
 }
+
 
 // Input
 function handleKey(e) {
@@ -719,6 +776,24 @@ document.getElementById('muteBtn').addEventListener('click', toggleMute);
 
 // Start
 window.addEventListener('load', init);
+
+function triggerNjettikkal() {
+  const sound = document.getElementById("njettikkalSound");
+
+  document.body.classList.add("njettikkal-attack");
+
+  if (!gameState.muted) {
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
+  }
+
+  // Auto remove after animation
+  setTimeout(() => {
+    document.body.classList.remove("njettikkal-attack");
+  }, 600);
+}
+
+
 </script>
 </body>
 </html>
