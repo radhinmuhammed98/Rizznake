@@ -74,6 +74,7 @@
 --thoppi: #3ac498;
 --sura: #ff6f00;
 --njettikkal: #f06f00;
+--jomu: #f96f80;
 --menu-highlight: #2d402d;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -298,6 +299,7 @@ color: white;
 .char-4 .fallback { background: var(--thoppi); }
 .char-5 .fallback { background: var(--sura); }
 .char-6 .fallback { background: var(--njettikkal); }
+.char-7 .fallback { background: var(--jomu); }
      
 .char-name {
 font-size: 15px;
@@ -316,7 +318,8 @@ margin: 0 auto 6px;
 .char-4 .char-name { color: var(--thoppi); }
 .char-5 .char-name { color: var(--sura); }
 .char-6 .char-name { color: var(--njettikkal); }
-
+.char-7 .char-name { color: var(--jomu); }
+     
 .char-desc {
 font-size: 10px;
 opacity: 0.7;
@@ -625,6 +628,14 @@ text-decoration: underline;
   </div>
   <div class="char-name">NJETTIKKAL</div>
   <div class="char-desc">NEW</div>
+</div>
+<div class="char-card char-7" onclick="selectChar(7)">
+  <div class="char-img">
+    <img src="jomu.png" alt="Njettikkal" onerror="this.nextElementSibling.style.display='flex'">
+    <div class="fallback">J</div>
+  </div>
+  <div class="char-name">JOMU</div>
+  <div class="char-desc">Enthaa Jomuu...!</div>
 </div>
 </div>
 </div>
